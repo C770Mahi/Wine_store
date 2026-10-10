@@ -1,8 +1,7 @@
 # Project Notes
 
 ## Current layers
-- Legacy Flask prototype remains at the repository root (`app.py`, `templates/`, `static/`)
-- New starter monorepo lives under `apps/`, `packages/`, `database/`, and `infra/`
+- Starter monorepo lives under `apps/`, `packages/`, `database/`, and `infra/`
 
 ## Workspace apps
 - `apps/customer-web` — Next.js storefront on port 3000

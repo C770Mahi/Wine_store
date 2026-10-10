@@ -1,14 +1,12 @@
 # Indus Reserve Platform Starter
 
-This repository now contains two layers:
+This repository contains a **starter monorepo** for the requested production-style architecture:
 
-1. The original Flask prototype at the project root (`app.py`, `templates/`, `static/`)
-2. A new **starter monorepo** for the requested production-style architecture:
-   - Next.js storefront
-   - Next.js admin dashboard
-   - Next.js delivery partner panel
-   - Express API
-   - PostgreSQL schema
+- Next.js storefront
+- Next.js admin dashboard
+- Next.js delivery partner panel
+- Express API
+- PostgreSQL schema
 
 ## Structure
 
@@ -38,7 +36,6 @@ infra/
 
 - The monorepo is a scaffold/starter, not a fully wired production deployment yet.
 - The current environment does not appear to have Node/npm on the shell path, so the scaffold is created as code structure and starter files.
-- The existing Flask prototype has been left intact for reference.
 
 ## Database bootstrap
 
