@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmed | Indus Reserve{% endblock %}
+
+{% block content %}
+<section class="section-pad cream-bg success-wrap">
+    <div class="container success-card card-surface large-card">
+        <span class="pill success-pill">Order confirmed</span>
+        <h1>Thank you for your purchase.</h1>
+        <p>Your order has been saved successfully. A member of the Indus Reserve Bangalore team will contact you with delivery timing and verification details.</p>
+
+        <div class="confirmation-meta">
+            <div>
+                <span>Order number</span>
+                <strong>#{{ order['id'] }}</strong>
+            </div>
+            <div>
+                <span>Customer</span>
+                <strong>{{ order['customer_name'] }}</strong>
+            </div>
+            <div>
+                <span>Total</span>
+                <strong>{{ order['total']|money }}</strong>
+            </div>
+        </div>
+
+        <div class="order-lines">
+            {% for item in items %}
+            <div class="checkout-item">
+                <div>
+                    <strong>{{ item['product_name'] }}</strong>
+                    <p>Qty {{ item['quantity'] }}</p>
+                </div>
+                <span>{{ item['line_total']|money }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="success-actions">
+            <a href="{{ url_for('shop') }}" class="btn btn-primary">Continue shopping</a>
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to homepage</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

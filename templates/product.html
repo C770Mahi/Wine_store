@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} | Indus Reserve{% endblock %}
+
+{% block content %}
+<section class="page-hero compact-page-hero">
+    <div class="container">
+        <span class="eyebrow">Product details</span>
+        <h1>{{ product.name }}</h1>
+        <p>Quick product view with tasting notes, pairing suggestions, and fast add-to-cart action.</p>
+    </div>
+</section>
+
+<section class="section-pad no-top-padding">
+    <div class="container product-detail-grid">
+        <div class="product-detail-image" style="background-image: url('{{ product.image }}');"></div>
+        <div class="product-detail-copy card-surface">
+            <div class="product-meta">
+                <span>{{ product.category }}</span>
+                <span>{{ product.badge }}</span>
+            </div>
+            <h2 class="product-detail-title">{{ product.name }}</h2>
+            <p class="lead-copy">{{ product.description }}</p>
+
+            <div class="detail-tags large-tags">
+                <span>{{ product.origin }}</span>
+                <span>{{ product.style }}</span>
+                <span>{{ product.size }}</span>
+            </div>
+
+            <div class="price-row large-price">
+                <strong>{{ product.price|money }}</strong>
+                <span>{{ product.old_price|money }}</span>
+            </div>
+
+            <div class="purchase-row">
+                <label>
+                    Quantity
+                    <input type="number" min="1" value="1" data-product-quantity>
+                </label>
+                <button type="button" class="btn btn-primary add-btn wide-add-btn" data-add-to-cart data-product-id="{{ product.id }}" data-quantity-input>ADD TO CART</button>
+            </div>
+
+            <div class="detail-panel">
+                <h3>Why you’ll like it</h3>
+                <ul class="feature-list compact">
+                    {% for note in product.tasting_notes %}
+                    <li><i class="fa-solid fa-check"></i> {{ note }}</li>
+                    {% endfor %}
+                </ul>
+                <p><strong>Ideal pairing:</strong> {{ product.pairing }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-pad quick-section">
+    <div class="container">
+        <div class="section-heading split-heading">
+            <div>
+                <span class="eyebrow">You may also like</span>
+                <h2>More from the {{ product.category }} shelf</h2>
+            </div>
+            <a href="{{ url_for('shop') }}?category={{ product.category }}" class="text-link">Shop {{ product.category }} <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="product-grid">
+            {% for item in similar_products %}
+            <article class="product-card card-surface">
+                <a href="{{ url_for('product_detail', slug=item.slug) }}" class="product-image-link">
+                    <div class="product-image" style="background-image: url('{{ item.image }}');"></div>
+                </a>
+                <div class="product-body">
+                    <div class="product-meta">
+                        <span>{{ item.category }}</span>
+                        <span>{{ item.badge }}</span>
+                    </div>
+                    <h3>{{ item.name }}</h3>
+                    <p>{{ item.origin }}</p>
+                    <div class="detail-tags">
+                        <span>{{ item.style }}</span>
+                        <span>{{ item.size }}</span>
+                    </div>
+                    <div class="price-row compact-price-row">
+                        <div>
+                            <strong>{{ item.price|money }}</strong>
+                            <span>{{ item.old_price|money }}</span>
+                        </div>
+                        <button type="button" class="btn btn-primary add-btn" data-add-to-cart data-product-id="{{ item.id }}">ADD</button>
+                    </div>
+                    <a href="{{ url_for('product_detail', slug=item.slug) }}" class="product-link">View details</a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

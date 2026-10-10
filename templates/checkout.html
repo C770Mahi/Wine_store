@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout | Indus Reserve{% endblock %}
+
+{% block content %}
+<section class="page-hero small-hero">
+    <div class="container">
+        <span class="eyebrow">Checkout</span>
+        <h1>Complete your order</h1>
+        <p>Enter your Bangalore delivery details and confirm legal drinking age to place your order.</p>
+    </div>
+</section>
+
+<section class="section-pad cream-bg no-top-padding">
+    <div class="container checkout-layout">
+        <form class="checkout-form card-surface" data-checkout-form>
+            <div class="section-heading left-align compact-heading">
+                <h2>Delivery details</h2>
+            </div>
+            <div class="form-grid">
+                <label>
+                    Full name
+                    <input type="text" name="name" required>
+                </label>
+                <label>
+                    Email address
+                    <input type="email" name="email" required>
+                </label>
+                <label>
+                    Phone number
+                    <input type="tel" name="phone" required>
+                </label>
+                <label>
+                    Street address
+                    <input type="text" name="address" required>
+                </label>
+                <label>
+                    City
+                    <input type="text" name="city" required>
+                </label>
+                <label>
+                    State
+                    <input type="text" name="state" required>
+                </label>
+                <label>
+                    ZIP code
+                    <input type="text" name="zip_code" required>
+                </label>
+                <label class="full-span">
+                    Delivery notes
+                    <textarea name="delivery_notes" rows="4" placeholder="Apartment, gate code, preferred delivery window, Bangalore locality, gift note, or party timing."></textarea>
+                </label>
+            </div>
+
+            <label class="checkbox-row">
+                <input type="checkbox" name="age_confirmed" value="true" required>
+                <span>I confirm that I am of legal drinking age in my state.</span>
+            </label>
+
+            <button type="submit" class="btn btn-primary">Place order</button>
+        </form>
+
+        <aside class="cart-summary card-surface sticky-summary">
+            <h2>Order summary</h2>
+            {% for item in cart['items'] %}
+            <div class="checkout-item">
+                <div>
+                    <strong>{{ item.name }}</strong>
+                    <p>Qty {{ item.quantity }}</p>
+                </div>
+                <span>{{ item.line_total|money }}</span>
+            </div>
+            {% endfor %}
+            <div class="summary-row"><span>Items</span><strong>{{ cart.subtotal|money }}</strong></div>
+            <div class="summary-row"><span>Shipping</span><strong>{{ cart.shipping|money }}</strong></div>
+            <div class="summary-row"><span>Estimated tax</span><strong>{{ cart.tax|money }}</strong></div>
+            <div class="summary-row total-row"><span>Total</span><strong>{{ cart.total|money }}</strong></div>
+            <p class="summary-note">Live payment gateway credentials can be connected later for production checkout.</p>
+        </aside>
+    </div>
+</section>
+{% endblock %}

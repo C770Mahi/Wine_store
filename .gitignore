@@ -1,0 +1,17 @@
+node_modules/
+.next/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.venv/
+__pycache__/
+store.db
+.DS_Store
+.idea/
+.vscode/
+apps/**/.next/
+apps/**/node_modules/
+apps/**/dist/
