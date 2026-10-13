@@ -200,22 +200,56 @@ function formatDate(value: string) {
   });
 }
 
-async function apiFetch<T>(path: string, init?: RequestInit) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {})
-    },
-    cache: 'no-store'
-  });
-
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(payload.message ?? 'Request failed');
+function getActionErrorMessage(error: unknown, fallback: string) {
+  const message = error instanceof Error ? error.message : fallback;
+  if (/route not found/i.test(message)) {
+    return 'The current API deployment is missing this admin category route. Redeploy the API and try again.';
   }
+  return message;
+}
 
-  return response.json() as Promise<T>;
+async function apiFetch<T>(path: string, init?: RequestInit) {
+  const method = init?.method ?? 'GET';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(init?.headers ?? {})
+      },
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({ message: 'Request failed' })) as {
+        message?: string;
+        issues?: Array<{ path?: string; message?: string }>;
+      };
+      const issueMessage = payload.issues?.map((issue) => issue.path ? `${issue.path}: ${issue.message}` : issue.message).filter(Boolean).join('; ');
+      const message = issueMessage || payload.message || `Request failed with ${response.status}`;
+
+      console.error('Admin API request failed', {
+        path,
+        method,
+        status: response.status,
+        payload
+      });
+
+      throw new Error(message);
+    }
+
+    return response.json() as Promise<T>;
+  } catch (error) {
+    if (error instanceof TypeError) {
+      console.error('Admin API network error', {
+        path,
+        method,
+        error
+      });
+    }
+    throw error;
+  }
 }
 
 const pageMeta: Record<AdminPageMode, { eyebrow: string; title: string; description: string }> = {
@@ -573,7 +607,7 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
       resetProductForm();
       await loadCatalogState();
     } catch (err) {
-      setError(err instanceof Error ? err.message : editingProductId ? 'Unable to update product.' : 'Unable to create product.');
+      setError(getActionErrorMessage(err, editingProductId ? 'Unable to update product.' : 'Unable to create product.'));
     } finally {
       setBusyKey('');
     }
@@ -621,7 +655,7 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
       await loadCatalogState();
       setNotice('Category created successfully.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to create category.');
+      setError(getActionErrorMessage(err, 'Unable to create category.'));
     } finally {
       setBusyKey('');
     }
@@ -660,7 +694,7 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
       await loadCatalogState();
       setNotice('Category updated successfully.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to update category.');
+      setError(getActionErrorMessage(err, 'Unable to update category.'));
     } finally {
       setBusyKey('');
     }
@@ -701,7 +735,7 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
         ? `Category deleted. ${productLabel.charAt(0).toUpperCase()}${productLabel.slice(1)} ${hasSingleProduct ? 'was' : 'were'} also removed from the live catalog.`
         : 'Category deleted successfully.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to delete category.');
+      setError(getActionErrorMessage(err, 'Unable to delete category.'));
     } finally {
       setBusyKey('');
     }
