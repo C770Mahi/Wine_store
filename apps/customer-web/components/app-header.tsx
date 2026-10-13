@@ -28,6 +28,7 @@ export function AppHeader() {
   const [userName, setUserName] = useState('');
   const [hasSession, setHasSession] = useState(false);
   const [authReady, setAuthReady] = useState(false);
+  const isShopPage = pathname === '/shop';
 
   useEffect(() => {
     const syncState = async () => {
@@ -98,26 +99,28 @@ export function AppHeader() {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <nav className="flex gap-2 overflow-x-auto pb-1 pr-1">
-            {navItems.map((item) => {
-              const isActive = pathname === '/shop' && searchParams.get('category') === item.category;
-              return (
-                <Link
-                  key={item.label}
-                  href={{ pathname: '/shop' as Route, query: { category: item.category } }}
-                  className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition sm:px-4 sm:text-sm ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600'}`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+        {isShopPage ? null : (
+          <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <nav className="flex gap-2 overflow-x-auto pb-1 pr-1">
+              {navItems.map((item) => {
+                const isActive = pathname === '/shop' && searchParams.get('category') === item.category;
+                return (
+                  <Link
+                    key={item.label}
+                    href={{ pathname: '/shop' as Route, query: { category: item.category } }}
+                    className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition sm:px-4 sm:text-sm ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600'}`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
 
-          <div className="flex min-h-10 flex-wrap items-center gap-2 text-sm sm:gap-3">
-            {authControls}
+            <div className="flex min-h-10 flex-wrap items-center gap-2 text-sm sm:gap-3">
+              {authControls}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );

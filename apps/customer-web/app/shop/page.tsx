@@ -1,7 +1,8 @@
+import Link from 'next/link';
 import { Suspense } from 'react';
 import { ProductCard } from '@/components/product-card';
 import { ShopSortControl } from '@/components/shop-sort-control';
-import { Product, getProducts } from '@/lib/catalog';
+import { Product, getCategories, getProducts } from '@/lib/catalog';
 
 interface ShopPageProps {
   searchParams?: {
@@ -31,11 +32,16 @@ function sortProducts(products: Product[], sort: string) {
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const sort = searchParams?.sort ?? 'newest';
-  const products = sortProducts(await getProducts({
-    category: searchParams?.category,
-    search: searchParams?.search,
-    brand: searchParams?.brand
-  }), sort);
+  const activeCategory = searchParams?.category ?? '';
+  const [productsResponse, categories] = await Promise.all([
+    getProducts({
+      category: searchParams?.category,
+      search: searchParams?.search,
+      brand: searchParams?.brand
+    }),
+    getCategories()
+  ]);
+  const products = sortProducts(productsResponse, sort);
 
   return (
     <main className="page-shell pb-16 pt-8">
@@ -45,22 +51,45 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <p className="max-w-3xl text-sm text-muted">API-backed listing page with category search and fast neighbourhood shopping.</p>
       </div>
 
-      <section>
-        <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <div>
-            <p className="font-semibold text-ink">{products.length} products available</p>
-            <p className="text-sm text-muted">Connected to the Express API for real catalog responses.</p>
+      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+        <aside className="card h-fit p-5">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Categories</p>
+          <div className="mt-4 flex flex-col gap-2">
+            <Link href="/shop" className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${activeCategory ? 'border border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand' : 'border border-brand bg-brand text-white shadow-sm'}`}>
+              All categories
+            </Link>
+            {categories.map((category) => {
+              const isActive = activeCategory === category;
+              return (
+                <Link
+                  key={category}
+                  href={`/shop?category=${encodeURIComponent(category)}`}
+                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand'}`}
+                >
+                  {category}
+                </Link>
+              );
+            })}
           </div>
-          <Suspense fallback={<div className="chip">Sort: Newest first</div>}>
-            <ShopSortControl value={sort} />
-          </Suspense>
-        </div>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
+        </aside>
+
+        <section>
+          <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div>
+              <p className="font-semibold text-ink">{products.length} products available</p>
+              <p className="text-sm text-muted">Connected to the Express API for real catalog responses.</p>
+            </div>
+            <Suspense fallback={<div className="chip">Sort: Newest first</div>}>
+              <ShopSortControl value={sort} />
+            </Suspense>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
