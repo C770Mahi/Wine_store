@@ -35,15 +35,18 @@ router.post('/addresses', requireCustomerAuth, asyncHandler(async (request, resp
 
 router.patch('/addresses/:id', requireCustomerAuth, asyncHandler(async (request, response) => {
   const payload = addressPayloadSchema.parse(request.body);
-  response.json(await updateAddress(request.params.id, payload, getRequestUserId(request)!));
+  const addressId = z.string().parse(request.params.id);
+  response.json(await updateAddress(addressId, payload, getRequestUserId(request)!));
 }));
 
 router.delete('/addresses/:id', requireCustomerAuth, asyncHandler(async (request, response) => {
-  response.json(await deleteAddress(request.params.id, getRequestUserId(request)!));
+  const addressId = z.string().parse(request.params.id);
+  response.json(await deleteAddress(addressId, getRequestUserId(request)!));
 }));
 
 router.post('/addresses/:id/default', requireCustomerAuth, asyncHandler(async (request, response) => {
-  response.json(await setDefaultAddress(request.params.id, getRequestUserId(request)!));
+  const addressId = z.string().parse(request.params.id);
+  response.json(await setDefaultAddress(addressId, getRequestUserId(request)!));
 }));
 
 router.post('/pincode-check', asyncHandler(async (request, response) => {

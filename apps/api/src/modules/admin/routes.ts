@@ -161,19 +161,20 @@ router.post('/categories', asyncHandler(async (request, response) => {
 
 router.patch('/categories/:id', asyncHandler(async (request, response) => {
   const payload = z.object({ name: z.string().trim().min(2) }).parse(request.body);
-  await ensureActiveCategory(request.params.id, 'Category not found.');
+  const categoryId = z.string().parse(request.params.id);
+  await ensureActiveCategory(categoryId, 'Category not found.');
 
   const duplicate = await dbQuery<{ id: string }>(
     'SELECT id FROM categories WHERE LOWER(name) = LOWER($1) AND id <> $2 AND is_active = TRUE LIMIT 1',
-    [payload.name, request.params.id]
+    [payload.name, categoryId]
   );
   if (duplicate.rows[0]) {
     throw new Error('A category with this name already exists.');
   }
 
-  const slug = await createUniqueSlug('categories', payload.name, request.params.id);
-  await dbQuery('UPDATE categories SET name = $1, slug = $2 WHERE id = $3', [payload.name, slug, request.params.id]);
-  response.json({ message: 'Category updated', id: request.params.id, slug });
+  const slug = await createUniqueSlug('categories', payload.name, categoryId);
+  await dbQuery('UPDATE categories SET name = $1, slug = $2 WHERE id = $3', [payload.name, slug, categoryId]);
+  response.json({ message: 'Category updated', id: categoryId, slug });
 }));
 
 router.delete('/categories/:id', asyncHandler(async (request, response) => {
@@ -181,19 +182,20 @@ router.delete('/categories/:id', asyncHandler(async (request, response) => {
     replacementCategoryId: z.string().optional(),
     deleteProducts: z.boolean().optional()
   }).parse(request.body ?? {});
+  const categoryId = z.string().parse(request.params.id);
 
-  await ensureActiveCategory(request.params.id, 'Category not found.');
+  await ensureActiveCategory(categoryId, 'Category not found.');
 
-  if (payload.replacementCategoryId === request.params.id) {
+  if (payload.replacementCategoryId === categoryId) {
     throw new Error('Choose a different replacement category.');
   }
 
-  const linkedProducts = await dbQuery<{ id: string }>('SELECT id FROM products WHERE category_id = $1 AND is_active = TRUE', [request.params.id]);
+  const linkedProducts = await dbQuery<{ id: string }>('SELECT id FROM products WHERE category_id = $1 AND is_active = TRUE', [categoryId]);
   const productIds = linkedProducts.rows.map((row) => row.id);
 
   if (payload.replacementCategoryId) {
     await ensureActiveCategory(payload.replacementCategoryId, 'Choose a valid replacement category.');
-    await dbQuery('UPDATE products SET category_id = $1, updated_at = NOW() WHERE category_id = $2 AND is_active = TRUE', [payload.replacementCategoryId, request.params.id]);
+    await dbQuery('UPDATE products SET category_id = $1, updated_at = NOW() WHERE category_id = $2 AND is_active = TRUE', [payload.replacementCategoryId, categoryId]);
   } else if (productIds.length) {
     if (!payload.deleteProducts) {
       throw new Error('Choose a replacement category or confirm product deletion before removing this category.');
@@ -213,8 +215,8 @@ router.delete('/categories/:id', asyncHandler(async (request, response) => {
     );
   }
 
-  await dbQuery('UPDATE categories SET is_active = FALSE WHERE id = $1', [request.params.id]);
-  response.json({ message: 'Category deleted', id: request.params.id, productsAffected: productIds.length });
+  await dbQuery('UPDATE categories SET is_active = FALSE WHERE id = $1', [categoryId]);
+  response.json({ message: 'Category deleted', id: categoryId, productsAffected: productIds.length });
 }));
 
 router.post('/products', asyncHandler(async (request, response) => {
