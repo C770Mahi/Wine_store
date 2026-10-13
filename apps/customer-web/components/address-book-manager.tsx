@@ -256,8 +256,8 @@ export function AddressBookManager({
 
     const googleMaps = window.google.maps;
     const center = {
-      lat: Number.isFinite(form.latitude) ? form.latitude : defaultMapCenter.lat,
-      lng: Number.isFinite(form.longitude) ? form.longitude : defaultMapCenter.lng
+      lat: typeof form.latitude === 'number' ? form.latitude : defaultMapCenter.lat,
+      lng: typeof form.longitude === 'number' ? form.longitude : defaultMapCenter.lng
     };
 
     if (!mapInstanceRef.current) {
@@ -404,8 +404,8 @@ export function AddressBookManager({
     try {
       const payload: AddressPayload = {
         ...form,
-        latitude: Number.isFinite(form.latitude) ? form.latitude : null,
-        longitude: Number.isFinite(form.longitude) ? form.longitude : null,
+        latitude: typeof form.latitude === 'number' ? form.latitude : null,
+        longitude: typeof form.longitude === 'number' ? form.longitude : null,
         formattedAddress: form.formattedAddress?.trim() || buildFormattedAddress(form)
       };
       const savedAddress = editingAddressId
@@ -533,7 +533,7 @@ export function AddressBookManager({
                 <button type="button" className="btn-secondary" onClick={handleUseCurrentLocation} disabled={busyKey === 'current-location'}>
                   {busyKey === 'current-location' ? 'Locating...' : 'Use current location'}
                 </button>
-                {Number.isFinite(form.latitude) && Number.isFinite(form.longitude) ? <a href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`} target="_blank" rel="noreferrer" className="btn-secondary">Open in Maps</a> : null}
+                {typeof form.latitude === 'number' && typeof form.longitude === 'number' ? <a href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`} target="_blank" rel="noreferrer" className="btn-secondary">Open in Maps</a> : null}
               </div>
             </div>
 
@@ -547,8 +547,8 @@ export function AddressBookManager({
                 disabled={!GOOGLE_MAPS_API_KEY}
               />
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 text-sm text-muted">
-                <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Latitude</span><div className="mt-2 font-semibold text-ink">{Number.isFinite(form.latitude) ? form.latitude.toFixed(6) : 'Optional'}</div></div>
-                <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Longitude</span><div className="mt-2 font-semibold text-ink">{Number.isFinite(form.longitude) ? form.longitude.toFixed(6) : 'Optional'}</div></div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Latitude</span><div className="mt-2 font-semibold text-ink">{typeof form.latitude === 'number' ? form.latitude.toFixed(6) : 'Optional'}</div></div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Longitude</span><div className="mt-2 font-semibold text-ink">{typeof form.longitude === 'number' ? form.longitude.toFixed(6) : 'Optional'}</div></div>
                 <div className="rounded-2xl bg-slate-50 px-4 py-3 sm:col-span-2"><span className="text-xs uppercase tracking-[0.18em] text-brand">Detected address</span><div className="mt-2 font-semibold text-ink">{form.formattedAddress || 'Pick a location on the map to auto-fill this address, or enter it manually below.'}</div></div>
               </div>
               {GOOGLE_MAPS_API_KEY ? (
