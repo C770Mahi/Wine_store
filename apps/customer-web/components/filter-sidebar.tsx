@@ -9,7 +9,7 @@ export function FilterSidebar({ brands, volumes, priceBands }: FilterSidebarProp
     <aside className="card h-fit space-y-6 p-5">
       <div>
         <h3 className="text-lg font-bold text-ink">Filters</h3>
-        <p className="text-sm text-muted">Brand, price, volume and rating filters for quick ordering.</p>
+        <p className="text-sm text-muted">Brand, price, pack-size, and popularity filters for quick ordering.</p>
       </div>
 
       <div>
@@ -25,7 +25,7 @@ export function FilterSidebar({ brands, volumes, priceBands }: FilterSidebarProp
       </div>
 
       <div>
-        <p className="mb-3 text-sm font-semibold text-ink">Volume</p>
+        <p className="mb-3 text-sm font-semibold text-ink">Pack size</p>
         <div className="flex flex-wrap gap-2">
           {volumes.map((volume) => (
             <span key={volume} className="chip px-3 py-1 text-xs">{volume}</span>

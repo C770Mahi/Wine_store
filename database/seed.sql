@@ -1,90 +1,110 @@
-INSERT INTO users (id, name, email, mobile, password_hash, role, is_mobile_verified, is_email_verified, status)
-VALUES ('11111111-1111-1111-1111-111111111111', 'Demo User', 'demo@indusreserve.in', '9876543210', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'customer', TRUE, TRUE, 'active')
+INSERT INTO users (id, name, email, mobile, password_hash, role, is_mobile_verified, is_email_verified, dob, age_verified_at, kyc_status, kyc_submitted_at, kyc_reviewed_at, status)
+VALUES
+('11111111-1111-1111-1111-111111111111', 'Demo User', 'demo@nearkart.in', '9876543210', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'customer', TRUE, TRUE, '1992-08-12', NOW(), 'approved', NOW(), NOW(), 'active'),
+('11111111-1111-1111-1111-111111111112', 'Pending KYC User', 'pending@nearkart.in', '9000000012', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'customer', TRUE, TRUE, '1998-04-28', NULL, 'pending', NOW(), NULL, 'active')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO kyc_submissions (id, user_id, full_name, date_of_birth, document_type, document_number, front_image_url, back_image_url, selfie_image_url, status, rejection_reason, reviewed_at)
+VALUES
+('10101010-1010-1010-1010-101010101010', '11111111-1111-1111-1111-111111111111', 'Demo User', '1992-08-12', 'passport', 'P1234567', 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=80', NULL, 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80', 'approved', NULL, NOW()),
+('10101010-1010-1010-1010-101010101011', '11111111-1111-1111-1111-111111111112', 'Pending KYC User', '1998-04-28', 'aadhaar', '999988887777', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80', 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=900&q=80', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&q=80', 'pending', NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO delivery_partners (id, name, mobile, email, vehicle_type, license_number, is_active)
-VALUES ('22222222-2222-2222-2222-222222222222', 'Arjun Rider', '9000000001', 'partner@indusreserve.in', 'Bike', 'DL-INDUS-001', TRUE)
+VALUES ('22222222-2222-2222-2222-222222222222', 'Arjun Rider', '9000000001', 'partner@nearkart.in', 'Bike', 'DL-NEARKART-001', TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO stores (id, name, license_number, city, state, pincode, latitude, longitude, opening_time, closing_time, is_active)
-VALUES ('33333333-3333-3333-3333-333333333333', 'Residency Road Store', 'LIC-BLR-0001', 'Bangalore', 'Karnataka', '560025', 12.9716, 77.5946, '10:00', '22:00', TRUE)
+VALUES ('33333333-3333-3333-3333-333333333333', 'Near Kart Residency Road Hub', 'LIC-BLR-0001', 'Bangalore', 'Karnataka', '560025', 12.9716, 77.5946, '07:00', '23:00', TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO regions (id, state, city, pincode, is_serviceable, legal_age, cod_allowed, delivery_start_time, delivery_end_time, dry_day_block)
 VALUES
-('44444444-4444-4444-4444-444444444401', 'Karnataka', 'Bangalore', '560038', TRUE, 21, FALSE, '10:00', '22:00', FALSE),
-('44444444-4444-4444-4444-444444444402', 'Karnataka', 'Bangalore', '560034', TRUE, 21, FALSE, '10:00', '22:00', FALSE),
-('44444444-4444-4444-4444-444444444403', 'Karnataka', 'Bangalore', '560102', TRUE, 21, FALSE, '10:00', '22:00', FALSE)
+('44444444-4444-4444-4444-444444444401', 'Karnataka', 'Bangalore', '560038', TRUE, 18, TRUE, '07:00', '23:00', FALSE),
+('44444444-4444-4444-4444-444444444402', 'Karnataka', 'Bangalore', '560034', TRUE, 18, TRUE, '07:00', '23:00', FALSE),
+('44444444-4444-4444-4444-444444444403', 'Karnataka', 'Bangalore', '560102', TRUE, 18, TRUE, '07:00', '23:00', FALSE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO categories (id, name, slug, sort_order, is_active)
 VALUES
-('55555555-5555-5555-5555-555555555501', 'Beer', 'beer', 1, TRUE),
-('55555555-5555-5555-5555-555555555502', 'Whisky', 'whisky', 2, TRUE),
-('55555555-5555-5555-5555-555555555503', 'Vodka', 'vodka', 3, TRUE),
-('55555555-5555-5555-5555-555555555504', 'Rum', 'rum', 4, TRUE),
-('55555555-5555-5555-5555-555555555505', 'Wine', 'wine', 5, TRUE),
-('55555555-5555-5555-5555-555555555506', 'Brandy', 'brandy', 6, TRUE),
-('55555555-5555-5555-5555-555555555507', 'Gin', 'gin', 7, TRUE),
-('55555555-5555-5555-5555-555555555508', 'Tequila', 'tequila', 8, TRUE),
-('55555555-5555-5555-5555-555555555509', 'Mixers', 'mixers', 9, TRUE)
+('55555555-5555-5555-5555-555555555501', 'Vegetables', 'vegetables', 1, TRUE),
+('55555555-5555-5555-5555-555555555502', 'Fruits', 'fruits', 2, TRUE),
+('55555555-5555-5555-5555-555555555503', 'Dairy & Bakery', 'dairy-bakery', 3, TRUE),
+('55555555-5555-5555-5555-555555555504', 'Kitchen Items', 'kitchen-items', 4, TRUE),
+('55555555-5555-5555-5555-555555555505', 'Home Groceries', 'home-groceries', 5, TRUE),
+('55555555-5555-5555-5555-555555555506', 'Snacks & Drinks', 'snacks-drinks', 6, TRUE),
+('55555555-5555-5555-5555-555555555507', 'Home Care', 'home-care', 7, TRUE),
+('55555555-5555-5555-5555-555555555508', 'Cleaning Supplies', 'cleaning-supplies', 8, TRUE),
+('55555555-5555-5555-5555-555555555509', 'Daily Essentials', 'daily-essentials', 9, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO brands (id, name, slug, country, is_active)
 VALUES
-('66666666-6666-6666-6666-666666666601', 'Blenders Pride', 'blenders-pride', 'India', TRUE),
-('66666666-6666-6666-6666-666666666602', 'Kingfisher', 'kingfisher', 'India', TRUE),
-('66666666-6666-6666-6666-666666666603', 'Old Monk', 'old-monk', 'India', TRUE),
-('66666666-6666-6666-6666-666666666604', 'Smirnoff', 'smirnoff', 'India', TRUE)
+('66666666-6666-6666-6666-666666666601', 'Fresh Fields', 'fresh-fields', 'India', TRUE),
+('66666666-6666-6666-6666-666666666602', 'Farm Basket', 'farm-basket', 'India', TRUE),
+('66666666-6666-6666-6666-666666666603', 'Aashirvaad', 'aashirvaad', 'India', TRUE),
+('66666666-6666-6666-6666-666666666604', 'Fortune', 'fortune', 'India', TRUE),
+('66666666-6666-6666-6666-666666666605', 'Daily Fresh', 'daily-fresh', 'India', TRUE),
+('66666666-6666-6666-6666-666666666606', 'Vim', 'vim', 'India', TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO products (id, brand_id, category_id, name, slug, short_description, long_description, rating_avg, rating_count, is_active)
 VALUES
-('77777777-7777-7777-7777-777777777701', '66666666-6666-6666-6666-666666666601', '55555555-5555-5555-5555-555555555502', 'Blenders Pride Rare Premium Whisky', 'blenders-pride-whisky', 'Fast-moving premium whisky for urban Bangalore orders.', 'A strong Bangalore party shelf favorite with premium positioning and multiple moving bottle sizes.', 4.7, 128, TRUE),
-('77777777-7777-7777-7777-777777777702', '66666666-6666-6666-6666-666666666602', '55555555-5555-5555-5555-555555555501', 'Kingfisher Premium Lager', 'kingfisher-premium-beer', 'Popular beer with strong repeat order behavior in Bangalore.', 'A city staple for Bangalore gatherings, match nights, and easy add-to-cart reorders.', 4.6, 234, TRUE),
-('77777777-7777-7777-7777-777777777703', '66666666-6666-6666-6666-666666666603', '55555555-5555-5555-5555-555555555504', 'Old Monk XXX Rum', 'old-monk-rum', 'Classic Bangalore rum pick in multiple bottle sizes.', 'An iconic rum with strong reorder demand and familiar citywide retail presence.', 4.8, 190, TRUE),
-('77777777-7777-7777-7777-777777777704', '66666666-6666-6666-6666-666666666604', '55555555-5555-5555-5555-555555555503', 'Smirnoff Red Vodka', 'smirnoff-red-vodka', 'Common mixer-friendly vodka for quick commerce orders.', 'A broad-reach vodka choice for house parties, mixers, and easy weekend baskets.', 4.5, 156, TRUE)
+('77777777-7777-7777-7777-777777777701', '66666666-6666-6666-6666-666666666601', '55555555-5555-5555-5555-555555555501', 'Country Tomato', 'country-tomato', 'Fresh red tomatoes ideal for curries, salads, and daily cooking.', 'Farm-picked tomatoes with a bright colour and juicy texture, suitable for everyday kitchen prep.', 4.7, 128, TRUE),
+('77777777-7777-7777-7777-777777777702', '66666666-6666-6666-6666-666666666602', '55555555-5555-5555-5555-555555555502', 'Banana Robusta', 'banana-robusta', 'Naturally sweet bananas packed for everyday snacking.', 'Popular table bananas selected for quick breakfast baskets, smoothies, and lunchbox fruit portions.', 4.6, 234, TRUE),
+('77777777-7777-7777-7777-777777777703', '66666666-6666-6666-6666-666666666603', '55555555-5555-5555-5555-555555555505', 'Aashirvaad Whole Wheat Atta', 'aashirvaad-whole-wheat-atta', 'Trusted atta for soft rotis and daily family cooking.', 'A pantry staple with consistent quality, suited for chapatis, parathas, and routine monthly grocery baskets.', 4.8, 190, TRUE),
+('77777777-7777-7777-7777-777777777704', '66666666-6666-6666-6666-666666666604', '55555555-5555-5555-5555-555555555504', 'Fortune Sunlite Sunflower Oil', 'fortune-sunlite-sunflower-oil', 'Light cooking oil for everyday frying and sauteing.', 'A common kitchen essential for home cooks who want a versatile edible oil for frequent meal prep.', 4.5, 156, TRUE),
+('77777777-7777-7777-7777-777777777705', '66666666-6666-6666-6666-666666666605', '55555555-5555-5555-5555-555555555503', 'Daily Fresh Toned Milk', 'daily-fresh-toned-milk', 'Chilled milk packs for tea, coffee, and breakfast routines.', 'Daily-delivery milk packs designed for quick replenishment of fridge essentials and breakfast staples.', 4.4, 118, TRUE),
+('77777777-7777-7777-7777-777777777706', '66666666-6666-6666-6666-666666666606', '55555555-5555-5555-5555-555555555508', 'Vim Dishwash Liquid', 'vim-dishwash-liquid', 'Grease-cutting dishwash liquid for everyday kitchen cleanup.', 'A reliable dishwashing essential for sinks, utensils, and quick post-meal cleanup in busy homes.', 4.5, 84, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO product_images (id, product_id, image_url, alt_text, sort_order)
 VALUES
-('88888888-8888-8888-8888-888888888801', '77777777-7777-7777-7777-777777777701', 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?auto=format&fit=crop&w=900&q=80', 'Blenders Pride bottle', 0),
-('88888888-8888-8888-8888-888888888802', '77777777-7777-7777-7777-777777777702', 'https://images.unsplash.com/photo-1516458464372-ee7eae24b460?auto=format&fit=crop&w=900&q=80', 'Kingfisher beer bottle', 0),
-('88888888-8888-8888-8888-888888888803', '77777777-7777-7777-7777-777777777703', 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=900&q=80', 'Old Monk rum bottle', 0),
-('88888888-8888-8888-8888-888888888804', '77777777-7777-7777-7777-777777777704', 'https://images.unsplash.com/photo-1563223771-375783ee91ad?auto=format&fit=crop&w=900&q=80', 'Smirnoff vodka bottle', 0)
+('88888888-8888-8888-8888-888888888801', '77777777-7777-7777-7777-777777777701', 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?auto=format&fit=crop&w=900&q=80', 'Fresh tomatoes', 0),
+('88888888-8888-8888-8888-888888888802', '77777777-7777-7777-7777-777777777702', 'https://images.unsplash.com/photo-1574226516831-e1dff420e37f?auto=format&fit=crop&w=900&q=80', 'Banana bunch', 0),
+('88888888-8888-8888-8888-888888888803', '77777777-7777-7777-7777-777777777703', 'https://images.unsplash.com/photo-1586201375761-83865001e31b?auto=format&fit=crop&w=900&q=80', 'Whole wheat flour bag', 0),
+('88888888-8888-8888-8888-888888888804', '77777777-7777-7777-7777-777777777704', 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=900&q=80', 'Sunflower oil bottle', 0),
+('88888888-8888-8888-8888-888888888805', '77777777-7777-7777-7777-777777777705', 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=900&q=80', 'Milk packets', 0),
+('88888888-8888-8888-8888-888888888806', '77777777-7777-7777-7777-777777777706', 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=900&q=80', 'Dishwash liquid bottle', 0)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO product_variants (id, product_id, sku, volume_ml, pack_type, mrp, sale_price, tax_rate, is_active)
 VALUES
-('99999999-9999-9999-9999-999999999901', '77777777-7777-7777-7777-777777777701', 'BP-180', 180, 'Bottle', 590, 540, 18, TRUE),
-('99999999-9999-9999-9999-999999999902', '77777777-7777-7777-7777-777777777701', 'BP-375', 375, 'Bottle', 1090, 995, 18, TRUE),
-('99999999-9999-9999-9999-999999999903', '77777777-7777-7777-7777-777777777701', 'BP-750', 750, 'Bottle', 1990, 1840, 18, TRUE),
-('99999999-9999-9999-9999-999999999904', '77777777-7777-7777-7777-777777777702', 'KF-330', 330, 'Bottle', 110, 99, 18, TRUE),
-('99999999-9999-9999-9999-999999999905', '77777777-7777-7777-7777-777777777702', 'KF-650', 650, 'Bottle', 190, 180, 18, TRUE),
-('99999999-9999-9999-9999-999999999906', '77777777-7777-7777-7777-777777777703', 'OM-180', 180, 'Bottle', 220, 200, 18, TRUE),
-('99999999-9999-9999-9999-999999999907', '77777777-7777-7777-7777-777777777703', 'OM-750', 750, 'Bottle', 820, 760, 18, TRUE),
-('99999999-9999-9999-9999-999999999908', '77777777-7777-7777-7777-777777777704', 'SM-180', 180, 'Bottle', 420, 380, 18, TRUE),
-('99999999-9999-9999-9999-999999999909', '77777777-7777-7777-7777-777777777704', 'SM-750', 750, 'Bottle', 1490, 1390, 18, TRUE)
+('99999999-9999-9999-9999-999999999901', '77777777-7777-7777-7777-777777777701', 'NK-TOM-500', 500, 'g', 38, 32, 5, TRUE),
+('99999999-9999-9999-9999-999999999902', '77777777-7777-7777-7777-777777777701', 'NK-TOM-1KG', 1000, 'g', 72, 62, 5, TRUE),
+('99999999-9999-9999-9999-999999999903', '77777777-7777-7777-7777-777777777702', 'NK-BAN-6', 6, 'pcs', 48, 42, 5, TRUE),
+('99999999-9999-9999-9999-999999999904', '77777777-7777-7777-7777-777777777702', 'NK-BAN-12', 12, 'pcs', 92, 78, 5, TRUE),
+('99999999-9999-9999-9999-999999999905', '77777777-7777-7777-7777-777777777703', 'NK-ATT-5KG', 5000, 'g', 329, 289, 5, TRUE),
+('99999999-9999-9999-9999-999999999906', '77777777-7777-7777-7777-777777777703', 'NK-ATT-10KG', 10000, 'g', 649, 579, 5, TRUE),
+('99999999-9999-9999-9999-999999999907', '77777777-7777-7777-7777-777777777704', 'NK-OIL-1L', 1000, 'ml', 189, 165, 5, TRUE),
+('99999999-9999-9999-9999-999999999908', '77777777-7777-7777-7777-777777777704', 'NK-OIL-5L', 5000, 'ml', 899, 829, 5, TRUE),
+('99999999-9999-9999-9999-999999999909', '77777777-7777-7777-7777-777777777705', 'NK-MLK-500', 500, 'ml', 34, 31, 5, TRUE),
+('99999999-9999-9999-9999-999999999910', '77777777-7777-7777-7777-777777777705', 'NK-MLK-1L', 1000, 'ml', 74, 68, 5, TRUE),
+('99999999-9999-9999-9999-999999999911', '77777777-7777-7777-7777-777777777706', 'NK-VIM-500', 500, 'ml', 125, 109, 18, TRUE),
+('99999999-9999-9999-9999-999999999912', '77777777-7777-7777-7777-777777777706', 'NK-VIM-2L', 2000, 'ml', 395, 349, 18, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO inventories (id, variant_id, store_id, stock_qty, reserved_qty, low_stock_threshold, is_in_stock)
 VALUES
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '99999999-9999-9999-9999-999999999901', '33333333-3333-3333-3333-333333333333', 40, 0, 5, TRUE),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', '99999999-9999-9999-9999-999999999902', '33333333-3333-3333-3333-333333333333', 24, 0, 5, TRUE),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', '99999999-9999-9999-9999-999999999903', '33333333-3333-3333-3333-333333333333', 18, 0, 5, TRUE),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', '99999999-9999-9999-9999-999999999904', '33333333-3333-3333-3333-333333333333', 60, 0, 5, TRUE),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5', '99999999-9999-9999-9999-999999999905', '33333333-3333-3333-3333-333333333333', 42, 0, 5, TRUE),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa6', '99999999-9999-9999-9999-999999999906', '33333333-3333-3333-3333-333333333333', 28, 0, 5, TRUE),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa7', '99999999-9999-9999-9999-999999999907', '33333333-3333-3333-3333-333333333333', 15, 0, 5, TRUE),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa8', '99999999-9999-9999-9999-999999999908', '33333333-3333-3333-3333-333333333333', 22, 0, 5, TRUE),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa9', '99999999-9999-9999-9999-999999999909', '33333333-3333-3333-3333-333333333333', 16, 0, 5, TRUE)
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '99999999-9999-9999-9999-999999999901', '33333333-3333-3333-3333-333333333333', 60, 0, 8, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', '99999999-9999-9999-9999-999999999902', '33333333-3333-3333-3333-333333333333', 44, 0, 8, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', '99999999-9999-9999-9999-999999999903', '33333333-3333-3333-3333-333333333333', 36, 0, 6, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', '99999999-9999-9999-9999-999999999904', '33333333-3333-3333-3333-333333333333', 28, 0, 6, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5', '99999999-9999-9999-9999-999999999905', '33333333-3333-3333-3333-333333333333', 24, 0, 4, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa6', '99999999-9999-9999-9999-999999999906', '33333333-3333-3333-3333-333333333333', 18, 0, 4, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa7', '99999999-9999-9999-9999-999999999907', '33333333-3333-3333-3333-333333333333', 30, 0, 5, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa8', '99999999-9999-9999-9999-999999999908', '33333333-3333-3333-3333-333333333333', 12, 0, 3, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa9', '99999999-9999-9999-9999-999999999909', '33333333-3333-3333-3333-333333333333', 40, 0, 6, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa10', '99999999-9999-9999-9999-999999999910', '33333333-3333-3333-3333-333333333333', 26, 0, 6, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa11', '99999999-9999-9999-9999-999999999911', '33333333-3333-3333-3333-333333333333', 20, 0, 4, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa12', '99999999-9999-9999-9999-999999999912', '33333333-3333-3333-3333-333333333333', 14, 0, 3, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO coupons (id, code, type, value, min_order_value, max_discount, usage_limit, per_user_limit, is_active)
 VALUES
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', 'WELCOME150', 'flat', 150, 999, 150, 10000, 1, TRUE),
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2', 'PARTYNIGHT', 'percentage', 10, 1500, 250, 5000, 3, TRUE),
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3', 'FREEDEL', 'flat', 49, 299, 49, 5000, 5, TRUE)
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', 'WELCOME100', 'flat', 100, 499, 100, 10000, 1, TRUE),
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2', 'FRESH20', 'percentage', 20, 699, 200, 5000, 3, TRUE),
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3', 'FREEDEL', 'flat', 39, 299, 39, 5000, 5, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO addresses (id, user_id, label, recipient_name, mobile, address_line_1, city, state, country, pincode, latitude, longitude, is_default)
@@ -94,27 +114,29 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO carts (id, user_id, status, coupon_code)
-VALUES ('dddddddd-dddd-dddd-dddd-ddddddddddd1', '11111111-1111-1111-1111-111111111111', 'active', 'WELCOME150')
+VALUES ('dddddddd-dddd-dddd-dddd-ddddddddddd1', '11111111-1111-1111-1111-111111111111', 'active', 'WELCOME100')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO cart_items (id, cart_id, variant_id, quantity, unit_price)
 VALUES
-('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee1', 'dddddddd-dddd-dddd-dddd-ddddddddddd1', '99999999-9999-9999-9999-999999999903', 1, 1840),
-('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee2', 'dddddddd-dddd-dddd-dddd-ddddddddddd1', '99999999-9999-9999-9999-999999999905', 2, 180)
+('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee1', 'dddddddd-dddd-dddd-dddd-ddddddddddd1', '99999999-9999-9999-9999-999999999905', 1, 289),
+('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee2', 'dddddddd-dddd-dddd-dddd-ddddddddddd1', '99999999-9999-9999-9999-999999999907', 1, 165),
+('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee3', 'dddddddd-dddd-dddd-dddd-ddddddddddd1', '99999999-9999-9999-9999-999999999910', 1, 68)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO orders (id, user_id, store_id, address_id, order_number, status, payment_status, subtotal, discount_total, tax_total, delivery_fee, grand_total, age_confirmed, placed_at)
-VALUES ('ffffffff-ffff-ffff-ffff-fffffffffff1', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333333', 'cccccccc-cccc-cccc-cccc-ccccccccccc1', 'IR10001', 'assigned', 'paid', 2200, 150, 308, 0, 2358, TRUE, NOW())
+VALUES ('ffffffff-ffff-ffff-ffff-fffffffffff1', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333333', 'cccccccc-cccc-cccc-cccc-ccccccccccc1', 'NK10001', 'assigned', 'paid', 522, 100, 73, 0, 495, FALSE, NOW())
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO order_items (id, order_id, variant_id, product_name, variant_name, quantity, unit_price, tax_amount, line_total)
 VALUES
-('12121212-1212-1212-1212-121212121211', 'ffffffff-ffff-ffff-ffff-fffffffffff1', '99999999-9999-9999-9999-999999999903', 'Blenders Pride Rare Premium Whisky', '750 ml', 1, 1840, 258, 2098),
-('12121212-1212-1212-1212-121212121212', 'ffffffff-ffff-ffff-ffff-fffffffffff1', '99999999-9999-9999-9999-999999999905', 'Kingfisher Premium Lager', '650 ml', 2, 180, 50, 410)
+('12121212-1212-1212-1212-121212121211', 'ffffffff-ffff-ffff-ffff-fffffffffff1', '99999999-9999-9999-9999-999999999905', 'Aashirvaad Whole Wheat Atta', '5 kg', 1, 289, 40, 329),
+('12121212-1212-1212-1212-121212121212', 'ffffffff-ffff-ffff-ffff-fffffffffff1', '99999999-9999-9999-9999-999999999907', 'Fortune Sunlite Sunflower Oil', '1 L', 1, 165, 23, 188),
+('12121212-1212-1212-1212-121212121213', 'ffffffff-ffff-ffff-ffff-fffffffffff1', '99999999-9999-9999-9999-999999999910', 'Daily Fresh Toned Milk', '1 L', 1, 68, 10, 78)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO payments (id, order_id, provider, provider_payment_id, provider_order_id, method, status, amount, currency, paid_at)
-VALUES ('13131313-1313-1313-1313-131313131313', 'ffffffff-ffff-ffff-ffff-fffffffffff1', 'razorpay', 'pay_demo_1', 'order_demo_1', 'UPI', 'paid', 2358, 'INR', NOW())
+VALUES ('13131313-1313-1313-1313-131313131313', 'ffffffff-ffff-ffff-ffff-fffffffffff1', 'razorpay', 'pay_demo_1', 'order_demo_1', 'UPI', 'paid', 495, 'INR', NOW())
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO delivery_assignments (id, order_id, partner_id, status, assigned_at, picked_at)

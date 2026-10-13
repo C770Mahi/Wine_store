@@ -14,6 +14,7 @@ export function errorHandler(error: unknown, _request: Request, response: Respon
     return;
   }
 
+  console.error(error);
   const message = error instanceof Error ? error.message : 'Internal server error';
   const statusCode = /not found/i.test(message) ? 404 : /invalid|expired|incorrect/i.test(message) ? 401 : 500;
   response.status(statusCode).json({ message });

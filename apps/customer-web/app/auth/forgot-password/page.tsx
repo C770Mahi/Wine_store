@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
       const response = await forgotPasswordRequest(identifier);
       setPreviewCode(response.previewCode ?? '');
       setPhase('reset');
-      setMessage('Reset OTP sent successfully.');
+      setMessage(response.previewCode ? 'Reset OTP generated. Use the code shown below.' : 'Reset OTP sent successfully to your mobile.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to send reset OTP.');
     } finally {
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-6 space-y-4 rounded-3xl border border-slate-200 p-5">
             <input className="w-full rounded-2xl border border-slate-200 px-4 py-3" placeholder="Enter OTP" value={code} onChange={(event) => setCode(event.target.value)} />
             <input className="w-full rounded-2xl border border-slate-200 px-4 py-3" type="password" placeholder="New password" value={password} onChange={(event) => setPassword(event.target.value)} />
-            {previewCode ? <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">Dev OTP preview: <strong>{previewCode}</strong></div> : null}
+            {previewCode ? <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">OTP preview fallback: <strong>{previewCode}</strong></div> : null}
             <button type="button" className="btn-primary w-full" onClick={handleReset} disabled={loading || phase === 'done'}>{phase === 'done' ? 'Password updated' : 'Reset password'}</button>
           </div>
         ) : null}

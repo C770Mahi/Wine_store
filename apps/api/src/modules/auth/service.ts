@@ -5,11 +5,14 @@ import {
   createUser,
   findUserById,
   findUserByIdentifier,
+  getLatestKycSubmission,
   hasValidRefreshSession,
+  KycDocumentType,
   markEmailVerified,
   markMobileVerified,
   revokeRefreshSession,
   saveRefreshSession,
+  submitKycSubmission,
   updatePassword
 } from './repository';
 
@@ -21,6 +24,10 @@ function sanitizeUser(user: {
   role: string;
   isMobileVerified: boolean;
   isEmailVerified: boolean;
+  status: string;
+  kycStatus: string;
+  kycRejectedReason: string | null;
+  ageVerifiedAt: Date | null;
 }) {
   return {
     id: user.id,
@@ -29,7 +36,11 @@ function sanitizeUser(user: {
     mobile: user.mobile,
     role: user.role,
     isMobileVerified: user.isMobileVerified,
-    isEmailVerified: user.isEmailVerified
+    isEmailVerified: user.isEmailVerified,
+    status: user.status,
+    kycStatus: user.kycStatus,
+    kycRejectedReason: user.kycRejectedReason,
+    ageVerifiedAt: user.ageVerifiedAt?.toISOString() ?? null
   };
 }
 
@@ -41,6 +52,10 @@ async function issueAuthTokens(user: {
   name: string;
   isMobileVerified: boolean;
   isEmailVerified: boolean;
+  status: string;
+  kycStatus: string;
+  kycRejectedReason: string | null;
+  ageVerifiedAt: Date | null;
 }) {
   const accessToken = signAccessToken({ sub: user.id, role: user.role, email: user.email, mobile: user.mobile });
   const refreshToken = signRefreshToken({ sub: user.id, role: user.role, email: user.email, mobile: user.mobile });
@@ -77,7 +92,8 @@ export async function signup(input: { name: string; email: string; mobile: strin
   return {
     message: 'User registered',
     nextStep: 'verify-otp',
-    otp,
+    purpose: 'signup' as const,
+    ...otp,
     user: sanitizeUser(user)
   };
 }
@@ -142,6 +158,54 @@ export async function login(input: { identifier: string; password?: string; otp?
   }
 
   return issueAuthTokens(user);
+}
+
+export async function getCurrentUserProfile(userId: string) {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  return { user: sanitizeUser(user) };
+}
+
+export async function getKycOverview(userId: string) {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  return {
+    user: sanitizeUser(user),
+    submission: await getLatestKycSubmission(userId)
+  };
+}
+
+export async function submitKyc(userId: string, input: {
+  fullName: string;
+  dateOfBirth: string;
+  documentType: KycDocumentType;
+  documentNumber: string;
+  frontImageUrl: string;
+  backImageUrl?: string | null;
+  selfieImageUrl?: string | null;
+}) {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const submission = await submitKycSubmission({ userId, ...input });
+  const nextUser = await findUserById(userId);
+  if (!nextUser) {
+    throw new Error('User not found');
+  }
+
+  return {
+    message: 'KYC submitted successfully',
+    user: sanitizeUser(nextUser),
+    submission
+  };
 }
 
 export async function refreshSession(refreshToken: string) {

@@ -10,14 +10,14 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#15803d',
-          dark: '#166534',
-          soft: '#e8f7ee'
+          DEFAULT: '#0f8ea2',
+          dark: '#166072',
+          soft: '#e7f8fb'
         },
         ink: '#111827',
         muted: '#6b7280',
         surface: '#f8fafc',
-        accent: '#facc15'
+        accent: '#ff8a2b'
       },
       boxShadow: {
         card: '0 16px 40px rgba(15, 23, 42, 0.08)'

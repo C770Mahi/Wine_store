@@ -1,26 +1,57 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import {
   applyCouponRequest,
   CartData,
   formatCurrency,
+  getCart,
   removeCartItemRequest,
   removeCouponRequest,
   updateCartItemRequest
 } from '@/lib/catalog';
 
 interface CartPageClientProps {
-  initialCart: CartData;
+  initialCart?: CartData;
 }
 
-export function CartPageClient({ initialCart }: CartPageClientProps) {
+const emptyCart: CartData = {
+  id: 'cart-empty',
+  userId: 'guest',
+  items: [],
+  summary: {
+    subtotal: 0,
+    discount: 0,
+    tax: 0,
+    delivery: 0,
+    payable: 0
+  }
+};
+
+export function CartPageClient({ initialCart = emptyCart }: CartPageClientProps) {
   const [cart, setCart] = useState(initialCart);
-  const [couponCode, setCouponCode] = useState(cart.coupon?.code ?? '');
+  const [couponCode, setCouponCode] = useState(initialCart.coupon?.code ?? '');
   const [loadingItemId, setLoadingItemId] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const hydrateCart = async () => {
+      try {
+        const nextCart = await getCart();
+        setCart(nextCart);
+        setCouponCode(nextCart.coupon?.code ?? '');
+      } catch {
+        setCart(emptyCart);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void hydrateCart();
+  }, []);
 
   const mutateCart = async (action: () => Promise<CartData>, successMessage: string, itemId?: string) => {
     setLoadingItemId(itemId ?? 'global');
@@ -48,6 +79,10 @@ export function CartPageClient({ initialCart }: CartPageClientProps) {
     await mutateCart(() => applyCouponRequest(couponCode.trim()), 'Coupon applied.');
   };
 
+  if (isLoading) {
+    return <div className="card p-8 text-center text-sm text-muted">Loading your cart...</div>;
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <section className="space-y-4">
@@ -71,7 +106,7 @@ export function CartPageClient({ initialCart }: CartPageClientProps) {
         )) : (
           <article className="card p-8 text-center">
             <h2 className="text-2xl font-bold text-ink">Your cart is empty</h2>
-            <p className="mt-2 text-sm text-muted">Add a few bottles from the catalog to continue to checkout.</p>
+            <p className="mt-2 text-sm text-muted">Add a few essentials from the catalog to continue to checkout.</p>
             <Link href="/shop" className="btn-primary mt-5">Browse catalog</Link>
           </article>
         )}

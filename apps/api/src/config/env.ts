@@ -12,5 +12,9 @@ export const env = {
   razorpayKeyId: process.env.RAZORPAY_KEY_ID ?? '',
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET ?? '',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? '',
-  otpProviderApiKey: process.env.OTP_PROVIDER_API_KEY ?? ''
+  otpProviderName: process.env.OTP_PROVIDER_NAME ?? '',
+  otpProviderApiKey: process.env.OTP_PROVIDER_API_KEY ?? '',
+  otpProviderTemplateName: process.env.OTP_PROVIDER_TEMPLATE_NAME ?? '',
+  otpProviderAllowInsecureTls: process.env.OTP_PROVIDER_ALLOW_INSECURE_TLS === 'true',
+  otpDevPreviewEnabled: process.env.OTP_DEV_PREVIEW_ENABLED !== 'false'
 };

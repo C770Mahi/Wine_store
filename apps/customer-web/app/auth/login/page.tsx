@@ -24,7 +24,7 @@ export default function LoginPage() {
     try {
       const response = await sendOtpRequest({ identifier, purpose: 'login' });
       setPreviewCode(response.previewCode ?? '');
-      setMessage('OTP sent successfully.');
+      setMessage(response.previewCode ? 'OTP generated. Use the code shown below.' : 'OTP sent successfully to your mobile.');
       setMode('otp');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to send OTP.');
@@ -70,7 +70,7 @@ export default function LoginPage() {
             <input className="w-full rounded-2xl border border-slate-200 px-4 py-3" placeholder="Enter 6-digit OTP" value={otp} onChange={(event) => setOtp(event.target.value)} />
           )}
 
-          {previewCode ? <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">Dev OTP preview: <strong>{previewCode}</strong></div> : null}
+          {previewCode ? <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">OTP preview fallback: <strong>{previewCode}</strong></div> : null}
           {message ? <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{message}</div> : null}
           {error ? <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
 

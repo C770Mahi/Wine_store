@@ -3,16 +3,34 @@ import { v4 as uuid } from 'uuid';
 import { z } from 'zod';
 import { dbQuery } from '../../db/client';
 import { asyncHandler } from '../../lib/async-handler';
-import { listProducts } from '../catalog/repository';
+import { listKycRequests, reviewKycSubmission } from '../auth/repository';
+import { listBrandOptions, listCategoryOptions, listProducts } from '../catalog/repository';
 
 const router = Router();
 
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const variantPayloadSchema = z.object({
+  quantity: z.number().int().positive(),
+  packType: z.enum(['g', 'ml', 'pcs']),
+  mrp: z.number().nonnegative(),
+  salePrice: z.number().nonnegative(),
+  stockQty: z.number().int().nonnegative()
+});
+
 router.get('/dashboard', asyncHandler(async (_request, response) => {
-  const [ordersToday, revenueToday, activeCustomers, lowStock] = await Promise.all([
+  const [ordersToday, revenueToday, activeCustomers, lowStock, pendingKyc] = await Promise.all([
     dbQuery<{ count: string }>('SELECT COUNT(*)::text AS count FROM orders WHERE DATE(created_at) = CURRENT_DATE'),
     dbQuery<{ total: string }>('SELECT COALESCE(SUM(grand_total), 0)::text AS total FROM orders WHERE DATE(created_at) = CURRENT_DATE'),
     dbQuery<{ count: string }>("SELECT COUNT(*)::text AS count FROM users WHERE role = 'customer'"),
-    dbQuery<{ count: string }>('SELECT COUNT(*)::text AS count FROM inventories WHERE stock_qty <= low_stock_threshold OR is_in_stock = FALSE')
+    dbQuery<{ count: string }>('SELECT COUNT(*)::text AS count FROM inventories WHERE stock_qty <= low_stock_threshold OR is_in_stock = FALSE'),
+    dbQuery<{ count: string }>("SELECT COUNT(*)::text AS count FROM users WHERE role = 'customer' AND kyc_status = 'pending'")
   ]);
 
   response.json({
@@ -20,12 +38,20 @@ router.get('/dashboard', asyncHandler(async (_request, response) => {
     revenueToday: Number(revenueToday.rows[0]?.total ?? 0),
     activeCustomers: Number(activeCustomers.rows[0]?.count ?? 0),
     lowStockSkus: Number(lowStock.rows[0]?.count ?? 0),
+    pendingKycRequests: Number(pendingKyc.rows[0]?.count ?? 0),
     conversionRate: 18.6
   });
 }));
 
 router.get('/orders', asyncHandler(async (_request, response) => {
-  const { rows } = await dbQuery('SELECT id, order_number, status, payment_status, grand_total, created_at FROM orders ORDER BY created_at DESC LIMIT 100');
+  const { rows } = await dbQuery(
+    `SELECT o.id, o.order_number, o.status, o.payment_status, o.grand_total, o.created_at,
+            u.name AS customer_name, u.mobile AS customer_mobile
+     FROM orders o
+     INNER JOIN users u ON u.id = o.user_id
+     ORDER BY o.created_at DESC
+     LIMIT 100`
+  );
   response.json(rows);
 }));
 
@@ -39,23 +65,56 @@ router.get('/products', asyncHandler(async (_request, response) => {
   response.json(await listProducts());
 }));
 
+router.get('/product-options', asyncHandler(async (_request, response) => {
+  const [categories, brands] = await Promise.all([listCategoryOptions(), listBrandOptions()]);
+  response.json({ categories, brands });
+}));
+
 router.post('/products', asyncHandler(async (request, response) => {
   const payload = z.object({
     brandId: z.string(),
     categoryId: z.string(),
     name: z.string().min(2),
-    slug: z.string().min(2),
+    slug: z.string().min(2).optional(),
     shortDescription: z.string().min(2),
-    longDescription: z.string().min(2)
+    longDescription: z.string().min(2),
+    imageDataUrl: z.string().min(10).optional(),
+    imageUrl: z.string().min(10).optional(),
+    variants: z.array(variantPayloadSchema).min(1)
   }).parse(request.body);
 
+  const productId = uuid();
+  const slug = slugify(payload.slug ?? payload.name);
+
   await dbQuery(
-    `INSERT INTO products (id, brand_id, category_id, name, slug, short_description, long_description, is_active)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)`,
-    [uuid(), payload.brandId, payload.categoryId, payload.name, payload.slug, payload.shortDescription, payload.longDescription]
+    `INSERT INTO products (id, brand_id, category_id, name, slug, short_description, long_description, rating_avg, rating_count, is_active)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE)`,
+    [productId, payload.brandId, payload.categoryId, payload.name, slug, payload.shortDescription, payload.longDescription, 4.5, 0]
   );
 
-  response.status(201).json({ message: 'Product created' });
+  if (payload.imageDataUrl || payload.imageUrl) {
+    await dbQuery(
+      `INSERT INTO product_images (id, product_id, image_url, alt_text, sort_order)
+       VALUES ($1, $2, $3, $4, 0)`,
+      [uuid(), productId, payload.imageDataUrl ?? payload.imageUrl, payload.name]
+    );
+  }
+
+  for (const [index, variant] of payload.variants.entries()) {
+    const variantId = uuid();
+    await dbQuery(
+      `INSERT INTO product_variants (id, product_id, sku, volume_ml, pack_type, mrp, sale_price, tax_rate, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, TRUE)`,
+      [variantId, productId, `${slug.toUpperCase()}-${index + 1}`, variant.quantity, variant.packType, variant.mrp, variant.salePrice, variant.packType === 'ml' ? 18 : 5]
+    );
+    await dbQuery(
+      `INSERT INTO inventories (id, variant_id, store_id, stock_qty, reserved_qty, low_stock_threshold, is_in_stock)
+       VALUES ($1, $2, '33333333-3333-3333-3333-333333333333', $3, 0, $4, $5)`,
+      [uuid(), variantId, variant.stockQty, Math.max(2, Math.min(variant.stockQty || 2, 10)), variant.stockQty > 0]
+    );
+  }
+
+  response.status(201).json({ message: 'Product created', id: productId, slug });
 }));
 
 router.patch('/products/:id', asyncHandler(async (request, response) => {
@@ -82,13 +141,20 @@ router.patch('/products/:id', asyncHandler(async (request, response) => {
 
 router.get('/inventory', asyncHandler(async (_request, response) => {
   const { rows } = await dbQuery(
-    `SELECT p.name AS product, pv.volume_ml, i.stock_qty, i.low_stock_threshold, i.is_in_stock
+    `SELECT i.id, p.id AS product_id, pv.id AS variant_id, p.name AS product, pv.volume_ml, pv.pack_type, i.stock_qty, i.low_stock_threshold, i.is_in_stock
      FROM inventories i
      INNER JOIN product_variants pv ON pv.id = i.variant_id
      INNER JOIN products p ON p.id = pv.product_id
      ORDER BY p.name ASC, pv.volume_ml ASC`
   );
-  response.json(rows);
+  response.json(rows.map((row) => ({
+    ...row,
+    label: row.pack_type === 'g' && Number(row.volume_ml) >= 1000
+      ? `${Number(row.volume_ml) / 1000} kg`
+      : row.pack_type === 'ml' && Number(row.volume_ml) >= 1000
+        ? `${Number(row.volume_ml) / 1000} L`
+        : `${row.volume_ml} ${row.pack_type}`
+  })));
 }));
 
 router.patch('/inventory/:id', asyncHandler(async (request, response) => {
@@ -99,7 +165,7 @@ router.patch('/inventory/:id', asyncHandler(async (request, response) => {
 
 router.get('/customers', asyncHandler(async (_request, response) => {
   const { rows } = await dbQuery(
-    `SELECT u.id, u.name, u.email, u.mobile,
+    `SELECT u.id, u.name, u.email, u.mobile, u.status, u.kyc_status, u.kyc_rejected_reason, u.age_verified_at,
             COUNT(DISTINCT o.id)::int AS orders,
             COUNT(DISTINCT ci.id)::int AS active_cart_items
      FROM users u
@@ -111,6 +177,29 @@ router.get('/customers', asyncHandler(async (_request, response) => {
      ORDER BY u.created_at DESC`
   );
   response.json(rows);
+}));
+
+router.get('/kyc-requests', asyncHandler(async (_request, response) => {
+  response.json(await listKycRequests());
+}));
+
+router.patch('/kyc-requests/:id', asyncHandler(async (request, response) => {
+  const payload = z.object({
+    status: z.enum(['approved', 'rejected']),
+    rejectionReason: z.string().min(5).optional()
+  }).parse(request.body);
+
+  const user = await reviewKycSubmission({
+    submissionId: request.params.id as string,
+    status: payload.status,
+    rejectionReason: payload.rejectionReason ?? null
+  });
+
+  response.json({
+    message: `KYC ${payload.status}`,
+    userId: user?.id,
+    status: user?.kycStatus ?? payload.status
+  });
 }));
 
 router.get('/coupons', asyncHandler(async (_request, response) => {

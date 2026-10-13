@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
 
-interface AuthTokenPayload {
+export interface AuthTokenPayload {
   sub: string;
   role: string;
   mobile?: string;

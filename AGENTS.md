@@ -28,3 +28,4 @@
 ## Notes
 - Node/npm were not available on the shell path during scaffolding, so the monorepo was created as starter code and structure without running `npm install` or Next/Express processes in this session.
 - The API is now structured for database-backed operation rather than runtime mock fallback.
+- Maintain `delivery_platform_status_tracker.csv` at the repo root whenever requirement status changes; use statuses like `COMPLETED`, `IN_PROGRESS`, `PENDING`, or `BLOCKED` and keep the row details current.

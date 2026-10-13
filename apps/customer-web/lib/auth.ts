@@ -7,6 +7,8 @@ const USER_KEY = 'indus_reserve_user';
 export const AUTH_SESSION_EVENT = 'indus-reserve:auth-session';
 
 export type OtpPurpose = 'signup' | 'login' | 'reset_password' | 'verify_email';
+export type KycStatus = 'not_submitted' | 'pending' | 'approved' | 'rejected';
+export type KycDocumentType = 'aadhaar' | 'driving_license' | 'passport' | 'voter_id';
 
 export interface SessionUser {
   id: string;
@@ -16,6 +18,27 @@ export interface SessionUser {
   role: string;
   isMobileVerified: boolean;
   isEmailVerified: boolean;
+  status: string;
+  kycStatus: KycStatus;
+  kycRejectedReason: string | null;
+  ageVerifiedAt: string | null;
+}
+
+export interface KycSubmission {
+  id: string;
+  userId: string;
+  fullName: string;
+  dateOfBirth: string;
+  documentType: KycDocumentType;
+  documentNumber: string;
+  frontImageUrl: string;
+  backImageUrl: string | null;
+  selfieImageUrl: string | null;
+  status: KycStatus;
+  rejectionReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AuthResponse {
@@ -79,6 +102,29 @@ export async function resetPasswordRequest(payload: { identifier: string; code: 
   });
 }
 
+export async function getProfileRequest() {
+  return apiFetch<{ user: SessionUser }>('/auth/me');
+}
+
+export async function getKycRequest() {
+  return apiFetch<{ user: SessionUser; submission: KycSubmission | null }>('/auth/kyc');
+}
+
+export async function submitKycRequest(payload: {
+  fullName: string;
+  dateOfBirth: string;
+  documentType: KycDocumentType;
+  documentNumber: string;
+  frontImageUrl: string;
+  backImageUrl?: string | null;
+  selfieImageUrl?: string | null;
+}) {
+  return apiFetch<{ message: string; user: SessionUser; submission: KycSubmission | null }>('/auth/kyc', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}
+
 export function persistSession(session: AuthResponse) {
   if (typeof window === 'undefined') {
     return;
@@ -105,6 +151,15 @@ export function getStoredUser() {
   } catch {
     return null;
   }
+}
+
+export function updateStoredUser(user: SessionUser) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+  notifyAuthSessionChanged();
 }
 
 export function hasStoredSession() {

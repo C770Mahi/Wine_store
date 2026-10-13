@@ -22,10 +22,32 @@ export interface ProductRecord {
   variants: ProductVariantRecord[];
 }
 
+export interface CategoryOptionRecord {
+  id: string;
+  name: string;
+}
+
+export interface BrandOptionRecord {
+  id: string;
+  name: string;
+}
+
 interface ProductFilters {
   category?: string;
   brand?: string;
   search?: string;
+}
+
+function formatVariantLabel(quantity: number, unit: string) {
+  if (unit === 'g' && quantity >= 1000) {
+    return `${quantity / 1000} kg`;
+  }
+
+  if (unit === 'ml' && quantity >= 1000) {
+    return `${quantity / 1000} L`;
+  }
+
+  return `${quantity} ${unit}`;
 }
 
 function groupProductRows(rows: Array<Record<string, unknown>>): ProductRecord[] {
@@ -50,7 +72,7 @@ function groupProductRows(rows: Array<Record<string, unknown>>): ProductRecord[]
       existing.variants.push({
         id: String(row.variant_id),
         volumeMl: Number(row.volume_ml),
-        label: `${row.volume_ml} ml`,
+        label: formatVariantLabel(Number(row.volume_ml), String(row.pack_type ?? 'ml')),
         mrp: Number(row.mrp),
         salePrice: Number(row.sale_price),
         inStock: Boolean(row.is_in_stock)
@@ -63,13 +85,23 @@ function groupProductRows(rows: Array<Record<string, unknown>>): ProductRecord[]
   return Array.from(map.values());
 }
 
+export async function listCategoryOptions() {
+  const { rows } = await dbQuery<CategoryOptionRecord>('SELECT id, name FROM categories WHERE is_active = TRUE ORDER BY sort_order ASC, name ASC');
+  return rows;
+}
+
 export async function listCategories() {
-  const { rows } = await dbQuery<{ name: string }>('SELECT name FROM categories WHERE is_active = TRUE ORDER BY sort_order ASC, name ASC');
+  const rows = await listCategoryOptions();
   return rows.map((row) => row.name);
 }
 
+export async function listBrandOptions() {
+  const { rows } = await dbQuery<BrandOptionRecord>('SELECT id, name FROM brands WHERE is_active = TRUE ORDER BY name ASC');
+  return rows;
+}
+
 export async function listBrands() {
-  const { rows } = await dbQuery<{ name: string }>('SELECT name FROM brands WHERE is_active = TRUE ORDER BY name ASC');
+  const rows = await listBrandOptions();
   return rows.map((row) => row.name);
 }
 
@@ -105,6 +137,7 @@ export async function listProducts(filters: ProductFilters = {}) {
         pi.image_url,
         pv.id AS variant_id,
         pv.volume_ml,
+        pv.pack_type,
         pv.mrp,
         pv.sale_price,
         COALESCE(i.is_in_stock, TRUE) AS is_in_stock

@@ -29,7 +29,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
           <p className="mt-3 text-base text-muted">{product.description}</p>
 
           <div className="mt-6 rounded-3xl bg-brand-soft p-5">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-dark">Available sizes</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-dark">Available packs</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {product.variants.map((variant) => (
                 <div key={variant.id} className="rounded-2xl border border-emerald-200 bg-white p-4">
@@ -52,8 +52,8 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
               <p className="mt-1 font-bold text-ink">In stock</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm text-muted">Age gate</p>
-              <p className="mt-1 font-bold text-ink">21+/25+</p>
+              <p className="text-sm text-muted">Store support</p>
+              <p className="mt-1 font-bold text-ink">Quick help available</p>
             </div>
           </div>
         </section>

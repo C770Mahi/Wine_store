@@ -56,7 +56,7 @@ function calculateDiscount(subtotal: number, coupon: CouponRow | null) {
 
 function summarizeCart(subtotal: number, discount: number) {
   const tax = Math.round(subtotal * 0.14);
-  const delivery = subtotal > 699 ? 0 : 49;
+  const delivery = subtotal > 299 ? 0 : 39;
   return {
     subtotal,
     discount,
@@ -64,6 +64,18 @@ function summarizeCart(subtotal: number, discount: number) {
     delivery,
     payable: subtotal - discount + tax + delivery
   };
+}
+
+function formatVariantLabel(quantity: number, unit: string) {
+  if (unit === 'g' && quantity >= 1000) {
+    return `${quantity / 1000} kg`;
+  }
+
+  if (unit === 'ml' && quantity >= 1000) {
+    return `${quantity / 1000} L`;
+  }
+
+  return `${quantity} ${unit}`;
 }
 
 export async function getCart(userId = DEMO_USER_ID) {
@@ -75,8 +87,9 @@ export async function getCart(userId = DEMO_USER_ID) {
     unit_price: number;
     product_name: string;
     volume_ml: number;
+    pack_type: string;
   }>(
-    `SELECT ci.id, ci.variant_id, ci.quantity, ci.unit_price, p.name AS product_name, pv.volume_ml
+    `SELECT ci.id, ci.variant_id, ci.quantity, ci.unit_price, p.name AS product_name, pv.volume_ml, pv.pack_type
      FROM cart_items ci
      INNER JOIN product_variants pv ON pv.id = ci.variant_id
      INNER JOIN products p ON p.id = pv.product_id
@@ -95,7 +108,7 @@ export async function getCart(userId = DEMO_USER_ID) {
     items: rows.map((item) => ({
       id: item.id,
       variantId: item.variant_id,
-      productName: `${item.product_name} · ${item.volume_ml} ml`,
+      productName: `${item.product_name} · ${formatVariantLabel(Number(item.volume_ml), String(item.pack_type ?? 'ml'))}`,
       quantity: Number(item.quantity),
       unitPrice: Number(item.unit_price)
     })),
@@ -122,7 +135,8 @@ export async function addCartItem(input: { userId?: string; variantId: string; q
 
 export async function updateCartItem(input: { userId?: string; itemId: string; quantity: number }) {
   const userId = input.userId ?? DEMO_USER_ID;
-  const { rowCount } = await dbQuery('UPDATE cart_items SET quantity = $1, updated_at = NOW() WHERE id = $2', [input.quantity, input.itemId]);
+  const cartId = await getOrCreateCartId(userId);
+  const { rowCount } = await dbQuery('UPDATE cart_items SET quantity = $1, updated_at = NOW() WHERE id = $2 AND cart_id = $3', [input.quantity, input.itemId, cartId]);
   if (!rowCount) {
     return null;
   }
@@ -131,7 +145,8 @@ export async function updateCartItem(input: { userId?: string; itemId: string; q
 
 export async function removeCartItem(input: { userId?: string; itemId: string }) {
   const userId = input.userId ?? DEMO_USER_ID;
-  await dbQuery('DELETE FROM cart_items WHERE id = $1', [input.itemId]);
+  const cartId = await getOrCreateCartId(userId);
+  await dbQuery('DELETE FROM cart_items WHERE id = $1 AND cart_id = $2', [input.itemId, cartId]);
   return getCart(userId);
 }
 

@@ -1,15 +1,16 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../../lib/async-handler';
+import { getRequestUserId, requireCustomerAuth } from '../../middleware/auth';
 import { checkPincodeServiceability, checkServiceability, createAddress, listAddresses, listNearbyStores } from './repository';
 
 const router = Router();
 
-router.get('/addresses', asyncHandler(async (_request, response) => {
-  response.json(await listAddresses());
+router.get('/addresses', requireCustomerAuth, asyncHandler(async (request, response) => {
+  response.json(await listAddresses(getRequestUserId(request)!));
 }));
 
-router.post('/addresses', asyncHandler(async (request, response) => {
+router.post('/addresses', requireCustomerAuth, asyncHandler(async (request, response) => {
   const payload = z.object({
     label: z.string().min(2),
     recipientName: z.string().min(2),
@@ -20,7 +21,7 @@ router.post('/addresses', asyncHandler(async (request, response) => {
     pincode: z.string().min(6)
   }).parse(request.body);
 
-  response.status(201).json(await createAddress(payload));
+  response.status(201).json(await createAddress(payload, getRequestUserId(request)!));
 }));
 
 router.post('/pincode-check', asyncHandler(async (request, response) => {

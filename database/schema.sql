@@ -9,6 +9,11 @@ CREATE TABLE users (
     is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     dob DATE,
     age_verified_at TIMESTAMP,
+    kyc_status VARCHAR(30) NOT NULL DEFAULT 'not_submitted',
+    kyc_rejected_reason TEXT,
+    kyc_submitted_at TIMESTAMP,
+    kyc_reviewed_at TIMESTAMP,
+    kyc_reviewed_by UUID REFERENCES users(id),
     status VARCHAR(30) NOT NULL DEFAULT 'active',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -32,6 +37,24 @@ CREATE TABLE otp_challenges (
     expires_at TIMESTAMP NOT NULL,
     verified_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE kyc_submissions (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    full_name VARCHAR(120) NOT NULL,
+    date_of_birth DATE NOT NULL,
+    document_type VARCHAR(40) NOT NULL,
+    document_number VARCHAR(120) NOT NULL,
+    front_image_url TEXT NOT NULL,
+    back_image_url TEXT,
+    selfie_image_url TEXT,
+    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    rejection_reason TEXT,
+    reviewed_by UUID REFERENCES users(id),
+    reviewed_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE addresses (

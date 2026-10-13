@@ -13,13 +13,13 @@ export default async function HomePage() {
     <main className="pb-16">
       <section className="page-shell pt-8">
         <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-          <div className="card overflow-hidden bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 p-8 text-white">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-200">Alcohol delivery marketplace</p>
+          <div className="card overflow-hidden bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-900 p-8 text-white">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">Near Kart quick-commerce</p>
             <h1 className="mt-4 max-w-2xl text-4xl font-black tracking-tight sm:text-5xl">
-              Blinkit-style alcohol ordering experience for Bangalore.
+              Blinkit-style neighbourhood shopping for fast local delivery.
             </h1>
-            <p className="mt-4 max-w-2xl text-base text-emerald-50/80">
-              Search by brand, bottle size, price, and category. Discover fast-moving products, save addresses, pick slots, apply coupons, and track delivery in one modern storefront.
+            <p className="mt-4 max-w-2xl text-base text-cyan-50/80">
+              Explore trending products, save addresses, choose delivery slots, apply offers, and reorder daily needs from one modern instant-delivery storefront.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/shop" className="btn-primary">Shop now</Link>
@@ -31,8 +31,8 @@ export default async function HomePage() {
                 <p className="text-sm text-white/70">Delivery promise UI</p>
               </div>
               <div className="rounded-3xl bg-white/10 p-4">
-                <p className="text-2xl font-extrabold">21+/25+</p>
-                <p className="text-sm text-white/70">Age gate by region</p>
+                <p className="text-2xl font-extrabold">Top deals</p>
+                <p className="text-sm text-white/70">Local offers & savings</p>
               </div>
               <div className="rounded-3xl bg-white/10 p-4">
                 <p className="text-2xl font-extrabold">OTP + JWT</p>
@@ -55,7 +55,7 @@ export default async function HomePage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Featured products</p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight text-ink">Fast-moving shelf</h2>
+            <h2 className="mt-2 text-3xl font-black tracking-tight text-ink">Fast-moving picks</h2>
           </div>
           <Link href="/shop" className="text-sm font-semibold text-brand">See all</Link>
         </div>
@@ -70,8 +70,8 @@ export default async function HomePage() {
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           <div className="card bg-accent/20 p-8">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-800">Coupons & offers</p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight text-ink">Discount banners built for conversion.</h2>
-            <p className="mt-3 text-sm text-muted">Use this area for first-order discounts, premium shelf promos, Bangalore locality campaigns, and brand-funded offers.</p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight text-ink">Discount banners built for everyday baskets.</h2>
+            <p className="mt-3 text-sm text-muted">Use this area for first-order discounts, locality campaigns, bundle offers, and partner-funded promos.</p>
             <div className="mt-6 space-y-3">
               {offerBanners.map((offer) => (
                 <div key={offer.id} className="rounded-2xl border border-amber-200 bg-white px-4 py-3">

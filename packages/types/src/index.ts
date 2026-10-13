@@ -1,13 +1,4 @@
-export type Category =
-  | 'Beer'
-  | 'Whisky'
-  | 'Vodka'
-  | 'Rum'
-  | 'Wine'
-  | 'Brandy'
-  | 'Gin'
-  | 'Tequila'
-  | 'Mixers';
+export type Category = string;
 
 export interface ProductVariant {
   id: string;

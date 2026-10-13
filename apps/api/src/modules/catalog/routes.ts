@@ -27,7 +27,7 @@ router.get('/products/search/suggestions', asyncHandler(async (request, response
 }));
 
 router.get('/products/:slug', asyncHandler(async (request, response) => {
-  const product = await getProductBySlug(request.params.slug);
+  const product = await getProductBySlug(request.params.slug as string);
   if (!product) {
     response.status(404).json({ message: 'Product not found' });
     return;
@@ -37,7 +37,7 @@ router.get('/products/:slug', asyncHandler(async (request, response) => {
 }));
 
 router.get('/products/:slug/related', asyncHandler(async (request, response) => {
-  response.json(await getRelatedProducts(request.params.slug));
+  response.json(await getRelatedProducts(request.params.slug as string));
 }));
 
 export default router;

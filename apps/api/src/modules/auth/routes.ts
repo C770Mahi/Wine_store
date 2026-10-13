@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../../lib/async-handler';
-import { forgotPassword, login, logout, refreshSession, resetPassword, sendOtp, signup, verifyEmail, verifyOtp } from './service';
+import { getRequestUserId, requireCustomerAuth } from '../../middleware/auth';
+import { forgotPassword, getCurrentUserProfile, getKycOverview, login, logout, refreshSession, resetPassword, sendOtp, signup, submitKyc, verifyEmail, verifyOtp } from './service';
 
 const router = Router();
 
@@ -67,6 +68,28 @@ router.post('/verify-email', asyncHandler(async (request, response) => {
   }).parse(request.body);
 
   response.json(await verifyEmail(payload));
+}));
+
+router.get('/me', requireCustomerAuth, asyncHandler(async (request, response) => {
+  response.json(await getCurrentUserProfile(getRequestUserId(request)!));
+}));
+
+router.get('/kyc', requireCustomerAuth, asyncHandler(async (request, response) => {
+  response.json(await getKycOverview(getRequestUserId(request)!));
+}));
+
+router.post('/kyc', requireCustomerAuth, asyncHandler(async (request, response) => {
+  const payload = z.object({
+    fullName: z.string().min(2),
+    dateOfBirth: z.string().date(),
+    documentType: z.enum(['aadhaar', 'driving_license', 'passport', 'voter_id']),
+    documentNumber: z.string().min(4),
+    frontImageUrl: z.string().min(16),
+    backImageUrl: z.string().min(16).optional().nullable(),
+    selfieImageUrl: z.string().min(16).optional().nullable()
+  }).parse(request.body);
+
+  response.status(201).json(await submitKyc(getRequestUserId(request)!, payload));
 }));
 
 router.post('/logout', asyncHandler(async (request, response) => {

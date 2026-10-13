@@ -2,7 +2,7 @@ import { apiFetch } from './api';
 
 export const CART_UPDATED_EVENT = 'indus-reserve:cart-updated';
 
-export type Category = 'Beer' | 'Whisky' | 'Vodka' | 'Rum' | 'Wine' | 'Brandy' | 'Gin' | 'Tequila' | 'Mixers';
+export type Category = string;
 
 export interface Variant {
   id: string;
@@ -72,9 +72,9 @@ export interface OfferBanner {
 }
 
 export const offerBanners: OfferBanner[] = [
-  { id: 'offer-1', title: 'Flat ₹150 off', subtitle: 'Use WELCOME150 on orders above ₹999', couponCode: 'WELCOME150' },
-  { id: 'offer-2', title: 'Party cart deals', subtitle: 'Save more on whisky + beer combinations', couponCode: 'PARTYNIGHT' },
-  { id: 'offer-3', title: 'Free delivery', subtitle: 'On Bangalore orders above ₹699', couponCode: 'FREEDEL' }
+  { id: 'offer-1', title: 'Flat ₹100 off', subtitle: 'Use WELCOME100 on orders above ₹499', couponCode: 'WELCOME100' },
+  { id: 'offer-2', title: 'Fresh basket savings', subtitle: 'Save 20% on selected fruits, vegetables, and daily essentials', couponCode: 'FRESH20' },
+  { id: 'offer-3', title: 'Free delivery', subtitle: 'On neighbourhood orders above ₹299', couponCode: 'FREEDEL' }
 ];
 
 const emptyCart: CartData = {
@@ -112,7 +112,7 @@ export function buildFilterGroups(products: Product[], brands: string[]) {
   return {
     brands,
     volumes,
-    priceBands: ['Under ₹300', '₹300 - ₹999', '₹1000 - ₹1999', '₹2000+']
+    priceBands: ['Under ₹100', '₹100 - ₹299', '₹300 - ₹699', '₹700+']
   };
 }
 
@@ -155,6 +155,15 @@ export async function getCart() {
 
 export async function getAddresses() {
   return safeFetch(() => apiFetch<Address[]>('/location/addresses'), []);
+}
+
+export async function createOrderRequest(payload: { addressId: string; slot?: string; paymentMethod?: string; ageConfirmed: boolean }) {
+  const response = await apiFetch<{ orderId: string; orderNumber: string; status: string; paymentStatus: string }>('/checkout/create-order', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  notifyCartUpdated();
+  return response;
 }
 
 export async function addCartItemRequest(payload: { variantId: string; quantity?: number }) {
