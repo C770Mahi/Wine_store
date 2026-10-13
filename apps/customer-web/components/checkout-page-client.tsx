@@ -1,5 +1,6 @@
 'use client';
 
+import type { Route } from 'next';
 import Script from 'next/script';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -198,7 +199,7 @@ export function CheckoutPageClient() {
               razorpaySignature: paymentResponse.razorpay_signature
             });
             setCart(emptyCart);
-            router.push(`/checkout/success?orderId=${encodeURIComponent(verified.orderId)}`);
+            router.push(`/checkout/success?orderId=${encodeURIComponent(verified.orderId)}` as Route);
           } catch (verificationError) {
             setPlacingOrder(false);
             const failureMessage = verificationError instanceof Error ? verificationError.message : 'Payment verification failed.';
@@ -212,7 +213,7 @@ export function CheckoutPageClient() {
                 razorpayPaymentId: paymentResponse.razorpay_payment_id
               }
             }).catch(() => undefined);
-            router.push(`/checkout/failure?message=${encodeURIComponent(failureMessage)}`);
+            router.push(`/checkout/failure?message=${encodeURIComponent(failureMessage)}` as Route);
           }
         }
       });
@@ -235,7 +236,7 @@ export function CheckoutPageClient() {
             razorpayPaymentId: failure?.metadata?.payment_id
           }
         }).catch(() => undefined);
-        router.push(`/checkout/failure?message=${encodeURIComponent(failureMessage)}`);
+        router.push(`/checkout/failure?message=${encodeURIComponent(failureMessage)}` as Route);
       });
 
       razorpay.open();
