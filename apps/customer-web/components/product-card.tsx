@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { AddToCartButton } from '@/components/add-to-cart-button';
 import { Product, formatCurrency } from '@/lib/catalog';
@@ -14,7 +13,8 @@ export function ProductCard({ product }: ProductCardProps) {
     <article className="card overflow-hidden">
       <Link href={`/product/${product.slug}`}>
         <div className="relative h-56 w-full bg-slate-100">
-          <Image src={product.image} alt={product.name} fill className="object-cover" />
+          <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+          {product.isNew ? <span className="absolute left-3 top-3 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-white">New</span> : null}
         </div>
       </Link>
       <div className="space-y-3 p-4">

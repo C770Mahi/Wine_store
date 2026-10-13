@@ -60,12 +60,12 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO product_images (id, product_id, image_url, alt_text, sort_order)
 VALUES
-('88888888-8888-8888-8888-888888888801', '77777777-7777-7777-7777-777777777701', 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?auto=format&fit=crop&w=900&q=80', 'Fresh tomatoes', 0),
-('88888888-8888-8888-8888-888888888802', '77777777-7777-7777-7777-777777777702', 'https://images.unsplash.com/photo-1574226516831-e1dff420e37f?auto=format&fit=crop&w=900&q=80', 'Banana bunch', 0),
-('88888888-8888-8888-8888-888888888803', '77777777-7777-7777-7777-777777777703', 'https://images.unsplash.com/photo-1586201375761-83865001e31b?auto=format&fit=crop&w=900&q=80', 'Whole wheat flour bag', 0),
-('88888888-8888-8888-8888-888888888804', '77777777-7777-7777-7777-777777777704', 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=900&q=80', 'Sunflower oil bottle', 0),
-('88888888-8888-8888-8888-888888888805', '77777777-7777-7777-7777-777777777705', 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=900&q=80', 'Milk packets', 0),
-('88888888-8888-8888-8888-888888888806', '77777777-7777-7777-7777-777777777706', 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=900&q=80', 'Dishwash liquid bottle', 0)
+('88888888-8888-8888-8888-888888888801', '77777777-7777-7777-7777-777777777701', '/catalog/country-tomato.jpg', 'Fresh tomatoes', 0),
+('88888888-8888-8888-8888-888888888802', '77777777-7777-7777-7777-777777777702', '/catalog/banana-robusta.jpg', 'Banana bunch', 0),
+('88888888-8888-8888-8888-888888888803', '77777777-7777-7777-7777-777777777703', '/catalog/aashirvaad-whole-wheat-atta.jpg', 'Whole wheat flour bag', 0),
+('88888888-8888-8888-8888-888888888804', '77777777-7777-7777-7777-777777777704', '/catalog/fortune-sunlite-sunflower-oil.jpg', 'Sunflower oil bottle', 0),
+('88888888-8888-8888-8888-888888888805', '77777777-7777-7777-7777-777777777705', '/catalog/daily-fresh-toned-milk.jpg', 'Milk packets', 0),
+('88888888-8888-8888-8888-888888888806', '77777777-7777-7777-7777-777777777706', '/catalog/vim-dishwash-liquid.jpg', 'Dishwash liquid bottle', 0)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO product_variants (id, product_id, sku, volume_ml, pack_type, mrp, sale_price, tax_rate, is_active)

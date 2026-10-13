@@ -18,7 +18,13 @@
 
 ## Environment
 - Customer env example: `apps/customer-web/.env.example`
+- Admin env example: `apps/admin-web/.env.example`
 - API env example: `apps/api/.env.example`
+
+## Deployment
+- `render.yaml` provisions the API service and PostgreSQL for a Render blueprint flow
+- Vercel projects should use `apps/customer-web` and `apps/admin-web` as their root directories
+- Production API CORS can be configured with `CLIENT_ORIGIN`, `ADMIN_ORIGIN`, and comma-separated `ALLOWED_ORIGINS`
 
 ## Database
 - PostgreSQL starter schema: `database/schema.sql`

@@ -14,20 +14,44 @@ import { errorHandler, notFoundHandler } from './middleware/error-handler';
 
 export const app = express();
 
-const allowedOrigins = new Set([env.clientOrigin, 'http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001', 'http://127.0.0.1:3001']);
-try {
-  const clientOriginUrl = new URL(env.clientOrigin);
-  if (clientOriginUrl.hostname === 'localhost') {
-    allowedOrigins.add(`http://127.0.0.1${clientOriginUrl.port ? `:${clientOriginUrl.port}` : ''}`);
+const allowedOrigins = new Set([
+  env.clientOrigin,
+  env.adminOrigin,
+  ...env.allowedOrigins,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001'
+].filter(Boolean));
+
+function isAllowedLocalOrigin(origin: string) {
+  try {
+    const url = new URL(origin);
+    return ['localhost', '127.0.0.1'].includes(url.hostname);
+  } catch {
+    return false;
   }
-} catch {
-  allowedOrigins.add('http://127.0.0.1:3000');
-  allowedOrigins.add('http://127.0.0.1:3001');
 }
+
+function addLoopbackOriginPair(origin: string) {
+  try {
+    const url = new URL(origin);
+    if (url.hostname === 'localhost') {
+      allowedOrigins.add(`http://127.0.0.1${url.port ? `:${url.port}` : ''}`);
+    }
+    if (url.hostname === '127.0.0.1') {
+      allowedOrigins.add(`http://localhost${url.port ? `:${url.port}` : ''}`);
+    }
+  } catch {
+    // ignore malformed origins
+  }
+}
+
+[env.clientOrigin, env.adminOrigin, ...env.allowedOrigins].filter(Boolean).forEach(addLoopbackOriginPair);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.has(origin)) {
+    if (!origin || allowedOrigins.has(origin) || isAllowedLocalOrigin(origin)) {
       callback(null, true);
       return;
     }

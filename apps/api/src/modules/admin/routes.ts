@@ -24,6 +24,11 @@ const variantPayloadSchema = z.object({
   stockQty: z.number().int().nonnegative()
 });
 
+const editableVariantPayloadSchema = variantPayloadSchema.extend({
+  id: z.string().optional(),
+  inventoryId: z.string().optional()
+});
+
 router.get('/dashboard', asyncHandler(async (_request, response) => {
   const [ordersToday, revenueToday, activeCustomers, lowStock, pendingKyc] = await Promise.all([
     dbQuery<{ count: string }>('SELECT COUNT(*)::text AS count FROM orders WHERE DATE(created_at) = CURRENT_DATE'),
@@ -120,23 +125,109 @@ router.post('/products', asyncHandler(async (request, response) => {
 router.patch('/products/:id', asyncHandler(async (request, response) => {
   const payload = z.object({
     name: z.string().min(2).optional(),
+    brandId: z.string().optional(),
+    categoryId: z.string().optional(),
     shortDescription: z.string().min(2).optional(),
     longDescription: z.string().min(2).optional(),
-    isActive: z.boolean().optional()
+    imageDataUrl: z.string().min(10).optional(),
+    imageUrl: z.string().min(10).optional(),
+    isActive: z.boolean().optional(),
+    variants: z.array(editableVariantPayloadSchema).min(1).optional()
   }).parse(request.body);
 
   await dbQuery(
     `UPDATE products
      SET name = COALESCE($1, name),
-         short_description = COALESCE($2, short_description),
-         long_description = COALESCE($3, long_description),
-         is_active = COALESCE($4, is_active),
+         brand_id = COALESCE($2, brand_id),
+         category_id = COALESCE($3, category_id),
+         short_description = COALESCE($4, short_description),
+         long_description = COALESCE($5, long_description),
+         is_active = COALESCE($6, is_active),
          updated_at = NOW()
-     WHERE id = $5`,
-    [payload.name ?? null, payload.shortDescription ?? null, payload.longDescription ?? null, payload.isActive ?? null, request.params.id]
+     WHERE id = $7`,
+    [payload.name ?? null, payload.brandId ?? null, payload.categoryId ?? null, payload.shortDescription ?? null, payload.longDescription ?? null, payload.isActive ?? null, request.params.id]
   );
 
+  if (payload.imageDataUrl || payload.imageUrl) {
+    const existingImage = await dbQuery<{ id: string }>('SELECT id FROM product_images WHERE product_id = $1 AND sort_order = 0 LIMIT 1', [request.params.id]);
+    const imageUrl = payload.imageDataUrl ?? payload.imageUrl;
+
+    if (existingImage.rows[0]) {
+      await dbQuery('UPDATE product_images SET image_url = $1, alt_text = $2 WHERE id = $3', [imageUrl, payload.name ?? 'Product image', existingImage.rows[0].id]);
+    } else {
+      await dbQuery(
+        `INSERT INTO product_images (id, product_id, image_url, alt_text, sort_order)
+         VALUES ($1, $2, $3, $4, 0)`,
+        [uuid(), request.params.id, imageUrl, payload.name ?? 'Product image']
+      );
+    }
+  }
+
+  if (payload.variants) {
+    const existingVariants = await dbQuery<{ id: string }>('SELECT id FROM product_variants WHERE product_id = $1 AND is_active = TRUE', [request.params.id]);
+    const retainedVariantIds: string[] = [];
+
+    for (const [index, variant] of payload.variants.entries()) {
+      if (variant.id) {
+        retainedVariantIds.push(variant.id);
+        await dbQuery(
+          `UPDATE product_variants
+           SET volume_ml = $1,
+               pack_type = $2,
+               mrp = $3,
+               sale_price = $4,
+               tax_rate = $5,
+               is_active = TRUE
+           WHERE id = $6 AND product_id = $7`,
+          [variant.quantity, variant.packType, variant.mrp, variant.salePrice, variant.packType === 'ml' ? 18 : 5, variant.id, request.params.id]
+        );
+
+        const inventoryUpdate = await dbQuery(
+          `UPDATE inventories
+           SET stock_qty = $1,
+               low_stock_threshold = $2,
+               is_in_stock = $3,
+               updated_at = NOW()
+           WHERE variant_id = $4`,
+          [variant.stockQty, Math.max(2, Math.min(variant.stockQty || 2, 10)), variant.stockQty > 0, variant.id]
+        );
+
+        if (!inventoryUpdate.rowCount) {
+          await dbQuery(
+            `INSERT INTO inventories (id, variant_id, store_id, stock_qty, reserved_qty, low_stock_threshold, is_in_stock)
+             VALUES ($1, $2, '33333333-3333-3333-3333-333333333333', $3, 0, $4, $5)`,
+            [uuid(), variant.id, variant.stockQty, Math.max(2, Math.min(variant.stockQty || 2, 10)), variant.stockQty > 0]
+          );
+        }
+      } else {
+        const variantId = uuid();
+        retainedVariantIds.push(variantId);
+        await dbQuery(
+          `INSERT INTO product_variants (id, product_id, sku, volume_ml, pack_type, mrp, sale_price, tax_rate, is_active)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, TRUE)`,
+          [variantId, request.params.id, `${slugify(payload.name ?? `product-${request.params.id}` ).toUpperCase()}-${index + 1}`, variant.quantity, variant.packType, variant.mrp, variant.salePrice, variant.packType === 'ml' ? 18 : 5]
+        );
+        await dbQuery(
+          `INSERT INTO inventories (id, variant_id, store_id, stock_qty, reserved_qty, low_stock_threshold, is_in_stock)
+           VALUES ($1, $2, '33333333-3333-3333-3333-333333333333', $3, 0, $4, $5)`,
+          [uuid(), variantId, variant.stockQty, Math.max(2, Math.min(variant.stockQty || 2, 10)), variant.stockQty > 0]
+        );
+      }
+    }
+
+    const variantIdsToDisable = existingVariants.rows.map((variant) => variant.id).filter((id) => !retainedVariantIds.includes(id));
+    if (variantIdsToDisable.length) {
+      await dbQuery('UPDATE product_variants SET is_active = FALSE WHERE id = ANY($1::uuid[])', [variantIdsToDisable]);
+      await dbQuery('UPDATE inventories SET stock_qty = 0, is_in_stock = FALSE, updated_at = NOW() WHERE variant_id = ANY($1::uuid[])', [variantIdsToDisable]);
+    }
+  }
+
   response.json({ message: 'Product updated', id: request.params.id });
+}));
+
+router.delete('/products/:id', asyncHandler(async (request, response) => {
+  await dbQuery('UPDATE products SET is_active = FALSE, updated_at = NOW() WHERE id = $1', [request.params.id]);
+  response.json({ message: 'Product removed from live catalog', id: request.params.id });
 }));
 
 router.get('/inventory', asyncHandler(async (_request, response) => {

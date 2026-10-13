@@ -2,10 +2,13 @@ import { dbQuery } from '../../db/client';
 
 export interface ProductVariantRecord {
   id: string;
+  inventoryId?: string;
   volumeMl: number;
+  packType: string;
   label: string;
   mrp: number;
   salePrice: number;
+  stockQty: number;
   inStock: boolean;
 }
 
@@ -16,9 +19,13 @@ export interface ProductRecord {
   brand: string;
   category: string;
   rating: number;
+  shortDescription: string;
+  longDescription: string;
   description: string;
   image: string;
   eta: string;
+  createdAt: string;
+  isNew: boolean;
   variants: ProductVariantRecord[];
 }
 
@@ -50,6 +57,15 @@ function formatVariantLabel(quantity: number, unit: string) {
   return `${quantity} ${unit}`;
 }
 
+function isRecentlyAdded(value: string) {
+  const createdAt = new Date(value).getTime();
+  if (Number.isNaN(createdAt)) {
+    return false;
+  }
+
+  return Date.now() - createdAt <= 1000 * 60 * 20;
+}
+
 function groupProductRows(rows: Array<Record<string, unknown>>): ProductRecord[] {
   const map = new Map<string, ProductRecord>();
 
@@ -62,19 +78,26 @@ function groupProductRows(rows: Array<Record<string, unknown>>): ProductRecord[]
       brand: String(row.brand_name),
       category: String(row.category_name),
       rating: Number(row.rating_avg ?? 0),
+      shortDescription: String(row.short_description ?? ''),
+      longDescription: String(row.long_description ?? row.short_description ?? ''),
       description: String(row.short_description ?? row.long_description ?? ''),
       image: String(row.image_url ?? 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?auto=format&fit=crop&w=900&q=80'),
       eta: '18 mins',
+      createdAt: String(row.product_created_at ?? ''),
+      isNew: isRecentlyAdded(String(row.product_created_at ?? '')),
       variants: []
     };
 
     if (row.variant_id) {
       existing.variants.push({
         id: String(row.variant_id),
+        inventoryId: row.inventory_id ? String(row.inventory_id) : undefined,
         volumeMl: Number(row.volume_ml),
+        packType: String(row.pack_type ?? 'ml'),
         label: formatVariantLabel(Number(row.volume_ml), String(row.pack_type ?? 'ml')),
         mrp: Number(row.mrp),
         salePrice: Number(row.sale_price),
+        stockQty: Number(row.stock_qty ?? 0),
         inStock: Boolean(row.is_in_stock)
       });
     }
@@ -132,14 +155,17 @@ export async function listProducts(filters: ProductFilters = {}) {
         p.short_description,
         p.long_description,
         p.rating_avg,
+        p.created_at AS product_created_at,
         b.name AS brand_name,
         c.name AS category_name,
         pi.image_url,
         pv.id AS variant_id,
+        i.id AS inventory_id,
         pv.volume_ml,
         pv.pack_type,
         pv.mrp,
         pv.sale_price,
+        COALESCE(i.stock_qty, 0) AS stock_qty,
         COALESCE(i.is_in_stock, TRUE) AS is_in_stock
      FROM products p
      INNER JOIN brands b ON b.id = p.brand_id

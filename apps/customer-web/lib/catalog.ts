@@ -23,6 +23,8 @@ export interface Product {
   image: string;
   eta: string;
   description: string;
+  createdAt: string;
+  isNew: boolean;
   variants: Variant[];
 }
 

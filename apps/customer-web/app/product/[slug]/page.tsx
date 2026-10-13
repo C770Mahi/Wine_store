@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { AddToCartButton } from '@/components/add-to-cart-button';
 import { ProductCard } from '@/components/product-card';
@@ -16,8 +15,8 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
   return (
     <main className="page-shell pb-16 pt-8">
       <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
-        <div className="card relative min-h-[420px] overflow-hidden">
-          <Image src={product.image} alt={product.name} fill className="object-cover" />
+        <div className="card overflow-hidden">
+          <img src={product.image} alt={product.name} className="min-h-[420px] w-full object-cover" />
         </div>
         <section className="card p-8">
           <div className="flex flex-wrap gap-2 text-sm font-semibold text-muted">

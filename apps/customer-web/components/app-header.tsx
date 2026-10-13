@@ -3,21 +3,27 @@
 import type { Route } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { clearSession, AUTH_SESSION_EVENT, getStoredUser } from '@/lib/auth';
 import { CART_UPDATED_EVENT, getCart } from '@/lib/catalog';
 import nearKartLogo from '../../../{EXTERNAL}_Logos/IMG_0808.png';
 
-const navItems: Array<{ label: string; href: Route }> = [
-  { label: 'Vegetables', href: '/shop' },
-  { label: 'Fruits', href: '/shop' },
-  { label: 'Kitchen Items', href: '/shop' },
-  { label: 'Home Groceries', href: '/shop' },
-  { label: 'Home Care', href: '/shop' },
-  { label: 'Daily Needs', href: '/shop' }
-];
+const navItems = [
+  { label: 'Vegetables', category: 'Vegetables' },
+  { label: 'Fruits', category: 'Fruits' },
+  { label: 'Dairy & Bakery', category: 'Dairy & Bakery' },
+  { label: 'Kitchen Items', category: 'Kitchen Items' },
+  { label: 'Home Groceries', category: 'Home Groceries' },
+  { label: 'Snacks & Drinks', category: 'Snacks & Drinks' },
+  { label: 'Home Care', category: 'Home Care' },
+  { label: 'Cleaning Supplies', category: 'Cleaning Supplies' },
+  { label: 'Daily Essentials', category: 'Daily Essentials' }
+] satisfies Array<{ label: string; category: string }>;
 
 export function AppHeader() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [cartCount, setCartCount] = useState(0);
   const [userName, setUserName] = useState('');
 
@@ -46,14 +52,14 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="page-shell py-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-3">
-              <Image src={nearKartLogo} alt="Near Kart" className="h-14 w-auto" priority />
-              <div>
-                <p className="text-lg font-extrabold text-ink">Near Kart</p>
-                <p className="text-sm text-muted">Your neighbourhood store, online.</p>
+      <div className="page-shell pt-1 pb-4 pl-1 pr-4 sm:pl-3 sm:pr-6 lg:pl-4 lg:pr-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-start gap-4">
+            <Link href="/" className="flex items-center gap-1">
+              <Image src={nearKartLogo} alt="Near Kart" className="h-24 w-auto max-w-[340px] sm:h-28 sm:max-w-[440px] lg:max-w-[500px]" priority />
+              <div className="hidden sm:block">
+                <p className="text-base font-bold text-ink">Near Kart</p>
+                <p className="text-xs text-muted">Neighbourhood store</p>
               </div>
             </Link>
             <div className="hidden rounded-full bg-brand-soft px-4 py-2 text-sm font-semibold text-brand-dark md:block">
@@ -74,11 +80,18 @@ export function AppHeader() {
 
         <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <nav className="flex gap-3 overflow-x-auto pb-1">
-            {navItems.map((item) => (
-              <Link key={item.label} href={item.href} className="chip whitespace-nowrap">
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive = pathname === '/shop' && searchParams.get('category') === item.category;
+              return (
+                <Link
+                  key={item.label}
+                  href={{ pathname: '/shop' as Route, query: { category: item.category } }}
+                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600'}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-3 text-sm">
