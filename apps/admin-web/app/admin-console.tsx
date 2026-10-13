@@ -267,7 +267,6 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
   const [editingCategoryId, setEditingCategoryId] = useState('');
   const [categoryDraftName, setCategoryDraftName] = useState('');
   const [categoryEditName, setCategoryEditName] = useState('');
-  const [categoryReassignments, setCategoryReassignments] = useState<Record<string, string>>({});
   const [productSearch, setProductSearch] = useState('');
   const [productCategoryFilter, setProductCategoryFilter] = useState('All');
   const [productBrandFilter, setProductBrandFilter] = useState('All');
@@ -346,10 +345,6 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
     });
     setProductCategoryFilter((current) => current === 'All' || optionsPayload.categories.some((category) => category.name === current) ? current : 'All');
     setProductBrandFilter((current) => current === 'All' || optionsPayload.brands.some((brand) => brand.name === current) ? current : 'All');
-    setCategoryReassignments((current) => {
-      const nextEntries = optionsPayload.categories.map((category) => [category.id, current[category.id] ?? ''] as const);
-      return Object.fromEntries(nextEntries);
-    });
   };
 
   const loadCatalogState = async () => {
@@ -666,13 +661,11 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
   };
 
   const handleDeleteCategory = async (category: ProductOption & { productCount: number }) => {
-    const replacementCategoryId = categoryReassignments[category.id] ?? '';
-    const deletingProducts = category.productCount > 0 && !replacementCategoryId;
+    const hasSingleProduct = category.productCount === 1;
+    const productLabel = `${category.productCount} ${hasSingleProduct ? 'product' : 'products'}`;
     const confirmationMessage = category.productCount > 0
-      ? replacementCategoryId
-        ? `Delete ${category.name} and move ${category.productCount} product(s) to the selected category?`
-        : `Delete ${category.name} and remove ${category.productCount} product(s) from the live catalog?`
-      : `Delete ${category.name}?`;
+      ? `Are you sure you want to delete this category?\n\n${category.name} currently contains ${productLabel}. Deleting this category will also remove ${hasSingleProduct ? 'that product' : 'those products'} from the live catalog.`
+      : 'Are you sure you want to delete this category?';
 
     if (typeof window !== 'undefined' && !window.confirm(confirmationMessage)) {
       return;
@@ -686,8 +679,7 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
       await apiFetch(`/admin/categories/${category.id}`, {
         method: 'DELETE',
         body: JSON.stringify({
-          replacementCategoryId: replacementCategoryId || undefined,
-          deleteProducts: deletingProducts
+          deleteProducts: category.productCount > 0
         })
       });
 
@@ -699,11 +691,9 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
         resetProductForm();
       }
       await loadCatalogState();
-      setNotice(replacementCategoryId
-        ? 'Category deleted and products reassigned successfully.'
-        : category.productCount > 0
-          ? 'Category deleted and linked products removed from the live catalog.'
-          : 'Category deleted successfully.');
+      setNotice(category.productCount > 0
+        ? `Category deleted. ${productLabel.charAt(0).toUpperCase()}${productLabel.slice(1)} ${hasSingleProduct ? 'was' : 'were'} also removed from the live catalog.`
+        : 'Category deleted successfully.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete category.');
     } finally {
@@ -1035,83 +1025,55 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
 
       <div className="mt-5 space-y-4">
         {categoriesWithCounts.map((category) => {
-          const reassignOptions = productOptions.categories.filter((item) => item.id !== category.id);
+          const productLabel = `${category.productCount} ${category.productCount === 1 ? 'Product' : 'Products'}`;
           return (
             <article key={category.id} className="rounded-3xl border border-white/10 bg-slate-900/60 p-4">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                <div className="flex-1 space-y-3">
-                  {editingCategoryId === category.id ? (
-                    <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
-                      <input
-                        className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
-                        value={categoryEditName}
-                        onChange={(event) => setCategoryEditName(event.target.value)}
-                      />
-                      <button
-                        type="button"
-                        className="rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
-                        onClick={() => void handleCategoryUpdate()}
-                        disabled={busyKey === `category-save:${category.id}`}
-                      >
-                        {busyKey === `category-save:${category.id}` ? 'Saving...' : 'Save'}
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold text-white"
-                        onClick={() => {
-                          setEditingCategoryId('');
-                          setCategoryEditName('');
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <h3 className="text-lg font-bold text-white">{category.name}</h3>
-                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">{category.productCount} products</span>
-                      </div>
-                      <p className="mt-1 text-sm text-slate-400">Products in this category appear together on the owner dashboard and storefront.</p>
-                    </div>
-                  )}
-
-                  {category.productCount > 0 ? (
-                    <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
-                      <select
-                        className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
-                        value={categoryReassignments[category.id] ?? ''}
-                        onChange={(event) => setCategoryReassignments((current) => ({
-                          ...current,
-                          [category.id]: event.target.value
-                        }))}
-                      >
-                        <option value="">Delete products in this category</option>
-                        {reassignOptions.map((option) => (
-                          <option key={option.id} value={option.id}>Move products to {option.name}</option>
-                        ))}
-                      </select>
-                      <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-xs text-slate-400">
-                        Choose a replacement category to keep products, or leave blank to remove them.
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-
-                {editingCategoryId === category.id ? null : (
-                  <div className="flex flex-wrap gap-3">
-                    <button type="button" className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-semibold text-white" onClick={() => startEditCategory(category)}>
-                      Edit
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                {editingCategoryId === category.id ? (
+                  <div className="grid flex-1 gap-3 md:grid-cols-[1fr_auto_auto]">
+                    <input
+                      className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
+                      value={categoryEditName}
+                      onChange={(event) => setCategoryEditName(event.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                      onClick={() => void handleCategoryUpdate()}
+                      disabled={busyKey === `category-save:${category.id}`}
+                    >
+                      {busyKey === `category-save:${category.id}` ? 'Saving...' : 'Save'}
                     </button>
                     <button
                       type="button"
-                      className="rounded-2xl border border-rose-400/30 px-4 py-2 text-sm font-semibold text-rose-100 disabled:opacity-60"
-                      onClick={() => void handleDeleteCategory(category)}
-                      disabled={busyKey === `category-delete:${category.id}`}
+                      className="rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold text-white"
+                      onClick={() => {
+                        setEditingCategoryId('');
+                        setCategoryEditName('');
+                      }}
                     >
-                      {busyKey === `category-delete:${category.id}` ? 'Deleting...' : 'Delete'}
+                      Cancel
                     </button>
                   </div>
+                ) : (
+                  <>
+                    <div className="min-w-0">
+                      <h3 className="truncate text-lg font-bold text-white">{category.name} <span className="text-sm font-medium text-slate-400">({productLabel})</span></h3>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <button type="button" className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-semibold text-white" onClick={() => startEditCategory(category)}>
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-2xl border border-rose-400/30 px-4 py-2 text-sm font-semibold text-rose-100 disabled:opacity-60"
+                        onClick={() => void handleDeleteCategory(category)}
+                        disabled={busyKey === `category-delete:${category.id}`}
+                      >
+                        {busyKey === `category-delete:${category.id}` ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             </article>
