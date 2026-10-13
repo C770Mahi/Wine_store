@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1';
-const CUSTOM_PRESETS_STORAGE_KEY = 'near-kart-custom-presets';
 const orderStatuses = ['created', 'confirmed', 'packed', 'assigned', 'picked_up', 'delivered', 'cancelled'];
 
 type AdminPageMode = 'overview' | 'customers' | 'orders' | 'products' | 'product-add';
@@ -118,30 +117,6 @@ type InventoryDraft = {
   isInStock: boolean;
 };
 
-type ProductPreset = {
-  key: string;
-  category: string;
-  name: string;
-  brandName: string;
-  imageUrl: string;
-  shortDescription: string;
-  longDescription: string;
-  variants: Array<{
-    quantity: string;
-    packType: 'g' | 'ml' | 'pcs';
-    mrp: string;
-    salePrice: string;
-    stockQty: string;
-  }>;
-};
-
-type CustomPresetDraft = {
-  name: string;
-  imageUrl: string;
-  imageDataUrl: string;
-  imageName: string;
-};
-
 const emptyVariant = (): VariantForm => ({
   quantity: '',
   packType: 'g',
@@ -150,34 +125,31 @@ const emptyVariant = (): VariantForm => ({
   stockQty: ''
 });
 
-function createEmptyCustomPresetDraft(): CustomPresetDraft {
-  return {
-    name: '',
-    imageUrl: '',
-    imageDataUrl: '',
-    imageName: ''
-  };
-}
+const categoryBrandPreferences = [
+  { pattern: /fruit/i, brandName: 'Farm Basket' },
+  { pattern: /vegetable/i, brandName: 'Fresh Fields' },
+  { pattern: /dairy|bakery/i, brandName: 'Daily Fresh' },
+  { pattern: /clean/i, brandName: 'Vim' },
+  { pattern: /home care/i, brandName: 'Vim' },
+  { pattern: /grocery|kitchen|snacks|daily/i, brandName: 'Aashirvaad' }
+];
 
-function createPresetKey(category: string, name: string) {
-  return `${category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-}
+function getDefaultBrandId(categoryId: string, options: ProductOptions) {
+  const categoryName = options.categories.find((category) => category.id === categoryId)?.name ?? '';
+  const preferredBrandName = categoryBrandPreferences.find((entry) => entry.pattern.test(categoryName))?.brandName;
+  const preferredBrand = preferredBrandName
+    ? options.brands.find((brand) => brand.name === preferredBrandName)
+    : options.brands.find((brand) => brand.name === 'Fresh Fields');
 
-function createPresetVariant() {
-  return {
-    quantity: '',
-    packType: 'g' as const,
-    mrp: '',
-    salePrice: '',
-    stockQty: ''
-  };
+  return preferredBrand?.id ?? options.brands[0]?.id ?? '';
 }
 
 function createEmptyProductForm(options?: ProductOptions): ProductFormState {
+  const categoryId = options?.categories[0]?.id ?? '';
   return {
     name: '',
-    categoryId: options?.categories[0]?.id ?? '',
-    brandId: options?.brands[0]?.id ?? '',
+    categoryId,
+    brandId: options ? getDefaultBrandId(categoryId, options) : '',
     shortDescription: '',
     longDescription: '',
     imageUrl: '',
@@ -282,139 +254,6 @@ const quickLinks = [
   { href: '/products', label: 'Manage products', description: 'Edit, remove, and search products' }
 ];
 
-const productPresets: ProductPreset[] = [
-  {
-    key: 'carrot',
-    category: 'Vegetables',
-    name: 'Carrot',
-    brandName: 'Fresh Fields',
-    imageUrl: '/catalog/carrot.jpg',
-    shortDescription: 'Fresh crunchy carrots for salads, curries, and everyday cooking.',
-    longDescription: 'Bright and fresh carrots selected for daily kitchen use, suitable for curries, stir-fries, soups, and salads.',
-    variants: [{ quantity: '500', packType: 'g', mrp: '32', salePrice: '28', stockQty: '20' }]
-  },
-  {
-    key: 'country-tomato',
-    category: 'Vegetables',
-    name: 'Country Tomato',
-    brandName: 'Fresh Fields',
-    imageUrl: '/catalog/country-tomato.jpg',
-    shortDescription: 'Fresh red tomatoes ideal for curries, salads, and daily cooking.',
-    longDescription: 'Farm-picked tomatoes with a juicy texture and bright colour for regular household cooking.',
-    variants: [{ quantity: '500', packType: 'g', mrp: '38', salePrice: '32', stockQty: '20' }]
-  },
-  {
-    key: 'potato',
-    category: 'Vegetables',
-    name: 'Potato',
-    brandName: 'Fresh Fields',
-    imageUrl: '/catalog/potato.jpg',
-    shortDescription: 'Daily-use potatoes for curries, fries, and home cooking.',
-    longDescription: 'Versatile potatoes selected for regular kitchen use, great for sabzi, fries, snacks, and family meals.',
-    variants: [{ quantity: '1000', packType: 'g', mrp: '42', salePrice: '36', stockQty: '24' }]
-  },
-  {
-    key: 'onion',
-    category: 'Vegetables',
-    name: 'Onion',
-    brandName: 'Fresh Fields',
-    imageUrl: '/catalog/onion.jpg',
-    shortDescription: 'Fresh onions for gravies, salads, and everyday cooking.',
-    longDescription: 'Kitchen-staple onions with balanced flavour, suited for curry bases, salads, and regular family cooking.',
-    variants: [{ quantity: '1000', packType: 'g', mrp: '48', salePrice: '41', stockQty: '24' }]
-  },
-  {
-    key: 'cucumber',
-    category: 'Vegetables',
-    name: 'Cucumber',
-    brandName: 'Fresh Fields',
-    imageUrl: '/catalog/cucumber.jpg',
-    shortDescription: 'Cool and fresh cucumbers for salads and light meals.',
-    longDescription: 'Fresh cucumbers chosen for salads, sandwiches, and simple healthy snack plates at home.',
-    variants: [{ quantity: '500', packType: 'g', mrp: '34', salePrice: '29', stockQty: '18' }]
-  },
-  {
-    key: 'spinach',
-    category: 'Vegetables',
-    name: 'Spinach',
-    brandName: 'Fresh Fields',
-    imageUrl: '/catalog/spinach.jpg',
-    shortDescription: 'Leafy spinach bundles for dal, curries, and healthy meals.',
-    longDescription: 'Fresh spinach leaves packed for quick home cooking, ideal for saag, dal, stir-fries, and smoothies.',
-    variants: [{ quantity: '250', packType: 'g', mrp: '30', salePrice: '25', stockQty: '16' }]
-  },
-  {
-    key: 'capsicum',
-    category: 'Vegetables',
-    name: 'Capsicum',
-    brandName: 'Fresh Fields',
-    imageUrl: '/catalog/capsicum.jpg',
-    shortDescription: 'Fresh capsicum for stir-fries, pizza toppings, and curries.',
-    longDescription: 'Crisp capsicum selected for fast cooking, stir-fries, stuffing recipes, and colourful everyday meals.',
-    variants: [{ quantity: '500', packType: 'g', mrp: '72', salePrice: '64', stockQty: '14' }]
-  },
-  {
-    key: 'okra',
-    category: 'Vegetables',
-    name: 'Okra',
-    brandName: 'Fresh Fields',
-    imageUrl: '/catalog/okra.jpg',
-    shortDescription: 'Tender okra for fry recipes and homestyle vegetable dishes.',
-    longDescription: 'Fresh okra chosen for bhindi fry, masala recipes, and regular household vegetable cooking.',
-    variants: [{ quantity: '500', packType: 'g', mrp: '54', salePrice: '46', stockQty: '14' }]
-  },
-  {
-    key: 'banana-robusta',
-    category: 'Fruits',
-    name: 'Banana Robusta',
-    brandName: 'Farm Basket',
-    imageUrl: '/catalog/banana-robusta.jpg',
-    shortDescription: 'Naturally sweet bananas packed for everyday snacking.',
-    longDescription: 'Popular table bananas selected for smoothies, breakfast baskets, and lunchbox fruit portions.',
-    variants: [{ quantity: '6', packType: 'pcs', mrp: '48', salePrice: '42', stockQty: '20' }]
-  },
-  {
-    key: 'daily-fresh-toned-milk',
-    category: 'Dairy & Bakery',
-    name: 'Daily Fresh Toned Milk',
-    brandName: 'Daily Fresh',
-    imageUrl: '/catalog/daily-fresh-toned-milk.jpg',
-    shortDescription: 'Chilled milk packs for tea, coffee, and breakfast routines.',
-    longDescription: 'Daily-delivery milk packs designed for fridge essentials and breakfast staples.',
-    variants: [{ quantity: '1000', packType: 'ml', mrp: '74', salePrice: '68', stockQty: '20' }]
-  },
-  {
-    key: 'fortune-sunlite-sunflower-oil',
-    category: 'Kitchen Items',
-    name: 'Fortune Sunlite Sunflower Oil',
-    brandName: 'Fortune',
-    imageUrl: '/catalog/fortune-sunlite-sunflower-oil.jpg',
-    shortDescription: 'Light cooking oil for everyday frying and sauteing.',
-    longDescription: 'A versatile edible oil for frequent meal prep and daily kitchen use.',
-    variants: [{ quantity: '1000', packType: 'ml', mrp: '189', salePrice: '165', stockQty: '12' }]
-  },
-  {
-    key: 'aashirvaad-whole-wheat-atta',
-    category: 'Home Groceries',
-    name: 'Aashirvaad Whole Wheat Atta',
-    brandName: 'Aashirvaad',
-    imageUrl: '/catalog/aashirvaad-whole-wheat-atta.jpg',
-    shortDescription: 'Trusted atta for soft rotis and daily family cooking.',
-    longDescription: 'A pantry staple with consistent quality, suited for chapatis, parathas, and regular grocery baskets.',
-    variants: [{ quantity: '5000', packType: 'g', mrp: '329', salePrice: '289', stockQty: '12' }]
-  },
-  {
-    key: 'vim-dishwash-liquid',
-    category: 'Cleaning Supplies',
-    name: 'Vim Dishwash Liquid',
-    brandName: 'Vim',
-    imageUrl: '/catalog/vim-dishwash-liquid.jpg',
-    shortDescription: 'Grease-cutting dishwash liquid for everyday kitchen cleanup.',
-    longDescription: 'A reliable dishwashing essential for utensils and fast post-meal cleanup in busy homes.',
-    variants: [{ quantity: '500', packType: 'ml', mrp: '125', salePrice: '109', stockQty: '10' }]
-  }
-];
-
 export function AdminConsole({ mode }: { mode: AdminPageMode }) {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [orders, setOrders] = useState<OrderRow[]>([]);
@@ -425,10 +264,10 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
   const [inventoryDrafts, setInventoryDrafts] = useState<Record<string, InventoryDraft>>({});
   const [productForm, setProductForm] = useState<ProductFormState>(createEmptyProductForm());
   const [editingProductId, setEditingProductId] = useState('');
-  const [selectedPresetKey, setSelectedPresetKey] = useState('');
-  const [customPresets, setCustomPresets] = useState<ProductPreset[]>([]);
-  const [customPresetsLoaded, setCustomPresetsLoaded] = useState(false);
-  const [customPresetDraft, setCustomPresetDraft] = useState<CustomPresetDraft>(createEmptyCustomPresetDraft());
+  const [editingCategoryId, setEditingCategoryId] = useState('');
+  const [categoryDraftName, setCategoryDraftName] = useState('');
+  const [categoryEditName, setCategoryEditName] = useState('');
+  const [categoryReassignments, setCategoryReassignments] = useState<Record<string, string>>({});
   const [productSearch, setProductSearch] = useState('');
   const [productCategoryFilter, setProductCategoryFilter] = useState('All');
   const [productBrandFilter, setProductBrandFilter] = useState('All');
@@ -452,24 +291,22 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
     });
   }, [productBrandFilter, productCategoryFilter, productSearch, products]);
 
-  const selectedCategoryName = useMemo(
-    () => productOptions.categories.find((category) => category.id === productForm.categoryId)?.name ?? '',
-    [productForm.categoryId, productOptions.categories]
+  const categoriesWithCounts = useMemo(
+    () => productOptions.categories.map((category) => ({
+      ...category,
+      productCount: products.filter((product) => product.category === category.name).length
+    })),
+    [productOptions.categories, products]
   );
 
-  const allProductPresets = useMemo(
-    () => [...productPresets, ...customPresets],
-    [customPresets]
-  );
-
-  const availableProductPresets = useMemo(
-    () => allProductPresets.filter((preset) => preset.category === selectedCategoryName),
-    [allProductPresets, selectedCategoryName]
-  );
-
-  const selectedPreset = useMemo(
-    () => allProductPresets.find((preset) => preset.key === selectedPresetKey) ?? null,
-    [allProductPresets, selectedPresetKey]
+  const groupedFilteredProducts = useMemo(
+    () => categoriesWithCounts
+      .map((category) => ({
+        ...category,
+        products: filteredProducts.filter((product) => product.category === category.name)
+      }))
+      .filter((category) => category.products.length > 0),
+    [categoriesWithCounts, filteredProducts]
   );
 
   const isEditingProduct = Boolean(editingProductId);
@@ -491,32 +328,64 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
     }])));
   };
 
+  const applyCatalogState = (inventoryPayload: InventoryRow[], productsPayload: ProductRow[], optionsPayload: ProductOptions) => {
+    setInventory(inventoryPayload);
+    setProducts(productsPayload);
+    setProductOptions(optionsPayload);
+    syncInventoryDrafts(inventoryPayload);
+    setProductForm((current) => {
+      const hasCategory = optionsPayload.categories.some((category) => category.id === current.categoryId);
+      const categoryId = hasCategory ? current.categoryId : optionsPayload.categories[0]?.id || '';
+      const hasBrand = optionsPayload.brands.some((brand) => brand.id === current.brandId);
+      const brandId = hasBrand ? current.brandId : getDefaultBrandId(categoryId, optionsPayload);
+      return {
+        ...current,
+        categoryId,
+        brandId
+      };
+    });
+    setProductCategoryFilter((current) => current === 'All' || optionsPayload.categories.some((category) => category.name === current) ? current : 'All');
+    setProductBrandFilter((current) => current === 'All' || optionsPayload.brands.some((brand) => brand.name === current) ? current : 'All');
+    setCategoryReassignments((current) => {
+      const nextEntries = optionsPayload.categories.map((category) => [category.id, current[category.id] ?? ''] as const);
+      return Object.fromEntries(nextEntries);
+    });
+  };
+
+  const loadCatalogState = async () => {
+    const [inventoryPayload, productsPayload, optionsPayload] = await Promise.all([
+      apiFetch<InventoryRow[]>('/admin/inventory'),
+      apiFetch<ProductRow[]>('/admin/products'),
+      apiFetch<ProductOptions>('/admin/product-options')
+    ]);
+    applyCatalogState(inventoryPayload, productsPayload, optionsPayload);
+  };
+
   const load = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const [dashboardPayload, ordersPayload, customersPayload, inventoryPayload, productsPayload, optionsPayload] = await Promise.all([
-        apiFetch<DashboardData>('/admin/dashboard'),
-        apiFetch<OrderRow[]>('/admin/orders'),
-        apiFetch<CustomerRow[]>('/admin/customers'),
-        apiFetch<InventoryRow[]>('/admin/inventory'),
-        apiFetch<ProductRow[]>('/admin/products'),
-        apiFetch<ProductOptions>('/admin/product-options')
-      ]);
+      await loadCatalogState();
 
-      setDashboard(dashboardPayload);
-      setOrders(ordersPayload);
-      setCustomers(customersPayload);
-      setInventory(inventoryPayload);
-      setProducts(productsPayload);
-      setProductOptions(optionsPayload);
-      syncInventoryDrafts(inventoryPayload);
-      setProductForm((current) => ({
-        ...current,
-        categoryId: current.categoryId || optionsPayload.categories[0]?.id || '',
-        brandId: current.brandId || optionsPayload.brands[0]?.id || ''
-      }));
+      if (mode === 'overview') {
+        const [dashboardPayload, ordersPayload, customersPayload] = await Promise.all([
+          apiFetch<DashboardData>('/admin/dashboard'),
+          apiFetch<OrderRow[]>('/admin/orders'),
+          apiFetch<CustomerRow[]>('/admin/customers')
+        ]);
+        setDashboard(dashboardPayload);
+        setOrders(ordersPayload);
+        setCustomers(customersPayload);
+      }
+
+      if (mode === 'orders') {
+        setOrders(await apiFetch<OrderRow[]>('/admin/orders'));
+      }
+
+      if (mode === 'customers') {
+        setCustomers(await apiFetch<CustomerRow[]>('/admin/customers'));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load admin data.');
     } finally {
@@ -527,31 +396,6 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
   useEffect(() => {
     void load();
   }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    try {
-      const raw = window.localStorage.getItem(CUSTOM_PRESETS_STORAGE_KEY);
-      if (raw) {
-        setCustomPresets(JSON.parse(raw) as ProductPreset[]);
-      }
-    } catch {
-      setCustomPresets([]);
-    } finally {
-      setCustomPresetsLoaded(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !customPresetsLoaded) {
-      return;
-    }
-
-    window.localStorage.setItem(CUSTOM_PRESETS_STORAGE_KEY, JSON.stringify(customPresets));
-  }, [customPresets, customPresetsLoaded]);
 
   const handleOrderStatusChange = async (orderId: string, status: string) => {
     setBusyKey(`order:${orderId}`);
@@ -623,143 +467,17 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
 
   const resetProductForm = () => {
     setEditingProductId('');
-    setSelectedPresetKey('');
-    setCustomPresetDraft(createEmptyCustomPresetDraft());
     setProductForm(createEmptyProductForm(productOptions));
   };
 
   const startEditProduct = (product: ProductRow) => {
     setEditingProductId(product.id);
-    setSelectedPresetKey('');
-    setCustomPresetDraft(createEmptyCustomPresetDraft());
     setProductForm(createProductFormFromProduct(product, productOptions));
     setNotice('Editing product details. Save to publish changes.');
     setError('');
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
-
-  const applyProductPreset = (presetKey: string) => {
-    const preset = allProductPresets.find((item) => item.key === presetKey);
-    if (!preset) {
-      setSelectedPresetKey('');
-      return;
-    }
-
-    const matchedBrandId = productOptions.brands.find((brand) => brand.name === preset.brandName)?.id ?? productForm.brandId;
-    const imageName = preset.imageUrl.split('/').pop() ?? '';
-
-    setSelectedPresetKey(preset.key);
-    setProductForm((current) => ({
-      ...current,
-      name: preset.name,
-      brandId: matchedBrandId,
-      shortDescription: preset.shortDescription,
-      longDescription: preset.longDescription,
-      imageUrl: preset.imageUrl.startsWith('data:') ? '' : preset.imageUrl,
-      imageDataUrl: preset.imageUrl.startsWith('data:') ? preset.imageUrl : '',
-      imageName,
-      variants: preset.variants.map((variant) => ({ ...variant }))
-    }));
-    setNotice(`${preset.name} loaded from the ${preset.category} saved list.`);
-    setError('');
-  };
-
-  const startCustomProduct = () => {
-    setSelectedPresetKey('');
-    setCustomPresetDraft(createEmptyCustomPresetDraft());
-    setProductForm((current) => ({
-      ...current,
-      name: '',
-      shortDescription: '',
-      longDescription: '',
-      imageUrl: '',
-      imageDataUrl: '',
-      imageName: '',
-      variants: [emptyVariant()]
-    }));
-    setNotice(`Saved list is optional. Enter a new ${selectedCategoryName || 'product'} name, then upload or paste the image and save it.`);
-    setError('');
-  };
-
-  const handleCustomPresetImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        const imageDataUrl = reader.result;
-        setCustomPresetDraft((current) => ({
-          ...current,
-          imageDataUrl,
-          imageUrl: '',
-          imageName: file.name
-        }));
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleAddCustomPreset = () => {
-    const trimmedName = customPresetDraft.name.trim();
-    const imageSource = customPresetDraft.imageDataUrl || customPresetDraft.imageUrl;
-
-    if (!selectedCategoryName) {
-      setError('Select a category before adding a new saved item.');
-      setNotice('');
-      return;
-    }
-
-    if (!trimmedName) {
-      setError('Enter the missing item name, such as Apple.');
-      setNotice('');
-      return;
-    }
-
-    if (!imageSource) {
-      setError('Upload or paste an image for the missing item before adding it to the list.');
-      setNotice('');
-      return;
-    }
-
-    const brandName = productOptions.brands.find((brand) => brand.id === productForm.brandId)?.name ?? 'Fresh Fields';
-    const preset: ProductPreset = {
-      key: `custom-${createPresetKey(selectedCategoryName, trimmedName)}`,
-      category: selectedCategoryName,
-      name: trimmedName,
-      brandName,
-      imageUrl: imageSource,
-      shortDescription: `${trimmedName} added manually to the ${selectedCategoryName.toLowerCase()} list.`,
-      longDescription: `${trimmedName} was added manually to the ${selectedCategoryName.toLowerCase()} saved list so it can be reused while creating products.`,
-      variants: [createPresetVariant()]
-    };
-
-    const matchedBrandId = productOptions.brands.find((brand) => brand.name === preset.brandName)?.id ?? productForm.brandId;
-    const imageName = customPresetDraft.imageName || `${trimmedName}.jpg`;
-
-    setCustomPresets((current) => {
-      const remaining = current.filter((item) => item.key !== preset.key);
-      return [...remaining, preset];
-    });
-    setCustomPresetDraft(createEmptyCustomPresetDraft());
-    setSelectedPresetKey(preset.key);
-    setProductForm((current) => ({
-      ...current,
-      name: preset.name,
-      brandId: matchedBrandId,
-      shortDescription: preset.shortDescription,
-      longDescription: preset.longDescription,
-      imageUrl: preset.imageUrl.startsWith('data:') ? '' : preset.imageUrl,
-      imageDataUrl: preset.imageUrl.startsWith('data:') ? preset.imageUrl : '',
-      imageName,
-      variants: [createPresetVariant()]
-    }));
-    setNotice(`${preset.name} added to the ${selectedCategoryName} dropdown list.`);
-    setError('');
   };
 
   const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
@@ -785,60 +503,74 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
 
   const handleProductSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const trimmedName = productForm.name.trim();
+    const categoryId = productForm.categoryId.trim();
+    const shortDescription = productForm.shortDescription.trim() || `${trimmedName} available on Near Kart.`;
+    const longDescription = productForm.longDescription.trim() || `${trimmedName} is available on Near Kart with quick delivery and category-wise inventory tracking.`;
+    const brandId = productForm.brandId || getDefaultBrandId(categoryId, productOptions);
+    const variants = productForm.variants.map((variant) => ({
+      id: variant.id,
+      inventoryId: variant.inventoryId,
+      quantity: Number(variant.quantity),
+      packType: variant.packType,
+      mrp: Number(variant.mrp),
+      salePrice: Number(variant.salePrice),
+      stockQty: Number(variant.stockQty)
+    }));
+
+    if (!trimmedName) {
+      setError('Enter a product name before saving.');
+      setNotice('');
+      return;
+    }
+
+    if (!categoryId) {
+      setError('Select a category before saving the product.');
+      setNotice('');
+      return;
+    }
+
+    if (!variants.length || variants.some((variant) => !variant.quantity || variant.quantity <= 0 || Number.isNaN(variant.quantity) || variant.mrp < 0 || Number.isNaN(variant.mrp) || variant.salePrice < 0 || Number.isNaN(variant.salePrice) || variant.stockQty < 0 || Number.isNaN(variant.stockQty))) {
+      setError('Add at least one valid pack with quantity, prices, and stock.');
+      setNotice('');
+      return;
+    }
+
     setBusyKey('product-submit');
     setError('');
     setNotice('');
 
     try {
+      const payload = {
+        name: trimmedName,
+        categoryId,
+        brandId,
+        shortDescription,
+        longDescription,
+        imageUrl: productForm.imageUrl || undefined,
+        imageDataUrl: productForm.imageDataUrl || undefined,
+        variants
+      };
+
       if (editingProductId) {
         await apiFetch(`/admin/products/${editingProductId}`, {
           method: 'PATCH',
           body: JSON.stringify({
-            name: productForm.name,
-            categoryId: productForm.categoryId,
-            brandId: productForm.brandId,
-            shortDescription: productForm.shortDescription,
-            longDescription: productForm.longDescription,
-            imageUrl: productForm.imageUrl || undefined,
-            imageDataUrl: productForm.imageDataUrl || undefined,
-            isActive: true,
-            variants: productForm.variants.map((variant) => ({
-              id: variant.id,
-              inventoryId: variant.inventoryId,
-              quantity: Number(variant.quantity),
-              packType: variant.packType,
-              mrp: Number(variant.mrp),
-              salePrice: Number(variant.salePrice),
-              stockQty: Number(variant.stockQty)
-            }))
+            ...payload,
+            isActive: true
           })
         });
         setNotice('Product updated successfully.');
       } else {
         await apiFetch('/admin/products', {
           method: 'POST',
-          body: JSON.stringify({
-            name: productForm.name,
-            categoryId: productForm.categoryId,
-            brandId: productForm.brandId,
-            shortDescription: productForm.shortDescription,
-            longDescription: productForm.longDescription,
-            imageUrl: productForm.imageUrl || undefined,
-            imageDataUrl: productForm.imageDataUrl || undefined,
-            variants: productForm.variants.map((variant) => ({
-              quantity: Number(variant.quantity),
-              packType: variant.packType,
-              mrp: Number(variant.mrp),
-              salePrice: Number(variant.salePrice),
-              stockQty: Number(variant.stockQty)
-            }))
-          })
+          body: JSON.stringify(payload)
         });
         setNotice('Product created successfully.');
       }
 
       resetProductForm();
-      await load();
+      await loadCatalogState();
     } catch (err) {
       setError(err instanceof Error ? err.message : editingProductId ? 'Unable to update product.' : 'Unable to create product.');
     } finally {
@@ -858,10 +590,122 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
       if (editingProductId === productId) {
         resetProductForm();
       }
-      setProducts((current) => current.filter((product) => product.id !== productId));
+      await loadCatalogState();
       setNotice('Product removed from the live catalog.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to remove product.');
+    } finally {
+      setBusyKey('');
+    }
+  };
+
+  const handleCategoryCreate = async () => {
+    const name = categoryDraftName.trim();
+    if (!name) {
+      setError('Enter a category name before adding it.');
+      setNotice('');
+      return;
+    }
+
+    setBusyKey('category-create');
+    setError('');
+    setNotice('');
+
+    try {
+      await apiFetch('/admin/categories', {
+        method: 'POST',
+        body: JSON.stringify({ name })
+      });
+      setCategoryDraftName('');
+      await loadCatalogState();
+      setNotice('Category created successfully.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to create category.');
+    } finally {
+      setBusyKey('');
+    }
+  };
+
+  const startEditCategory = (category: ProductOption) => {
+    setEditingCategoryId(category.id);
+    setCategoryEditName(category.name);
+    setError('');
+    setNotice('Editing category name. Save to update the dashboard and storefront.');
+  };
+
+  const handleCategoryUpdate = async () => {
+    const name = categoryEditName.trim();
+    if (!editingCategoryId) {
+      return;
+    }
+
+    if (!name) {
+      setError('Enter the updated category name before saving.');
+      setNotice('');
+      return;
+    }
+
+    setBusyKey(`category-save:${editingCategoryId}`);
+    setError('');
+    setNotice('');
+
+    try {
+      await apiFetch(`/admin/categories/${editingCategoryId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name })
+      });
+      setEditingCategoryId('');
+      setCategoryEditName('');
+      await loadCatalogState();
+      setNotice('Category updated successfully.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update category.');
+    } finally {
+      setBusyKey('');
+    }
+  };
+
+  const handleDeleteCategory = async (category: ProductOption & { productCount: number }) => {
+    const replacementCategoryId = categoryReassignments[category.id] ?? '';
+    const deletingProducts = category.productCount > 0 && !replacementCategoryId;
+    const confirmationMessage = category.productCount > 0
+      ? replacementCategoryId
+        ? `Delete ${category.name} and move ${category.productCount} product(s) to the selected category?`
+        : `Delete ${category.name} and remove ${category.productCount} product(s) from the live catalog?`
+      : `Delete ${category.name}?`;
+
+    if (typeof window !== 'undefined' && !window.confirm(confirmationMessage)) {
+      return;
+    }
+
+    setBusyKey(`category-delete:${category.id}`);
+    setError('');
+    setNotice('');
+
+    try {
+      await apiFetch(`/admin/categories/${category.id}`, {
+        method: 'DELETE',
+        body: JSON.stringify({
+          replacementCategoryId: replacementCategoryId || undefined,
+          deleteProducts: deletingProducts
+        })
+      });
+
+      if (editingCategoryId === category.id) {
+        setEditingCategoryId('');
+        setCategoryEditName('');
+      }
+      if (productForm.categoryId === category.id) {
+        resetProductForm();
+      }
+      await loadCatalogState();
+      setNotice(replacementCategoryId
+        ? 'Category deleted and products reassigned successfully.'
+        : category.productCount > 0
+          ? 'Category deleted and linked products removed from the live catalog.'
+          : 'Category deleted successfully.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to delete category.');
     } finally {
       setBusyKey('');
     }
@@ -901,124 +745,28 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
                 value={productForm.name}
                 onChange={(event) => setProductForm((current) => ({ ...current, name: event.target.value }))}
               />
-              {createOnly ? <p className="text-xs text-slate-400">If the item is not in the saved list, type a new name here like Apple, Mango, or Grapes.</p> : null}
+              {createOnly ? <p className="text-xs text-slate-400">Enter the exact product name you want to add, such as Apple, Banana, or Mango.</p> : null}
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
               <select
                 className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
                 value={productForm.categoryId}
                 onChange={(event) => {
-                  setSelectedPresetKey('');
-                  setCustomPresetDraft(createEmptyCustomPresetDraft());
-                  setProductForm((current) => ({ ...current, categoryId: event.target.value }));
+                  const nextCategoryId = event.target.value;
+                  setProductForm((current) => ({
+                    ...current,
+                    categoryId: nextCategoryId,
+                    brandId: getDefaultBrandId(nextCategoryId, productOptions)
+                  }));
                 }}
               >
                 {productOptions.categories.map((category) => (
                   <option key={category.id} value={category.id}>{category.name}</option>
                 ))}
               </select>
-              <select
-                className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
-                value={productForm.brandId}
-                onChange={(event) => setProductForm((current) => ({ ...current, brandId: event.target.value }))}
-              >
-                {productOptions.brands.map((brand) => (
-                  <option key={brand.id} value={brand.id}>{brand.name}</option>
-                ))}
-              </select>
+              <p className="text-xs text-slate-400">Every product must belong to a category. Brand is assigned automatically.</p>
             </div>
           </div>
-
-          {createOnly ? (
-            <div className="space-y-3 rounded-2xl border border-white/10 bg-slate-900/60 p-4">
-              <p className="text-sm font-semibold text-white">Choose from saved catalog images</p>
-              <div className="grid gap-3 lg:grid-cols-[1fr_auto_auto]">
-                <select
-                  className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
-                  value={selectedPresetKey}
-                  onChange={(event) => setSelectedPresetKey(event.target.value)}
-                >
-                  <option value="">{selectedCategoryName ? `Select ${selectedCategoryName} item` : 'Select category first'}</option>
-                  {availableProductPresets.map((preset) => (
-                    <option key={preset.key} value={preset.key}>{preset.name}</option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  className="rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
-                  disabled={!selectedPresetKey}
-                  onClick={() => applyProductPreset(selectedPresetKey)}
-                >
-                  Add
-                </button>
-                <button
-                  type="button"
-                  className="rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold text-white"
-                  onClick={startCustomProduct}
-                >
-                  New custom product
-                </button>
-              </div>
-              {selectedPreset ? (
-                <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-4">
-                  <div className="flex items-center gap-4">
-                    <img src={selectedPreset.imageUrl} alt={selectedPreset.name} className="h-20 w-20 rounded-2xl object-cover" />
-                    <div>
-                      <p className="font-semibold text-white">{selectedPreset.name}</p>
-                      <p className="mt-1 text-sm text-slate-400">{selectedPreset.shortDescription}</p>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-              <div className="rounded-2xl border border-dashed border-emerald-400/25 bg-emerald-500/5 p-4 space-y-3">
-                <div>
-                  <p className="text-sm font-semibold text-white">Item not in list? Add it to this dropdown</p>
-                  <p className="mt-1 text-xs text-slate-400">Example: choose Fruits, type Apple, upload the Apple photo, then save it to the Fruits list.</p>
-                </div>
-                <div className="grid gap-3 md:grid-cols-2">
-                  <input
-                    className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
-                    placeholder={selectedCategoryName ? `New ${selectedCategoryName} item name` : 'Select category first'}
-                    value={customPresetDraft.name}
-                    onChange={(event) => setCustomPresetDraft((current) => ({ ...current, name: event.target.value }))}
-                  />
-                  <input
-                    className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
-                    placeholder="Image URL (optional if you upload a file)"
-                    value={customPresetDraft.imageUrl}
-                    onChange={(event) => setCustomPresetDraft((current) => ({ ...current, imageUrl: event.target.value, imageDataUrl: '', imageName: '' }))}
-                  />
-                </div>
-                <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
-                    onChange={handleCustomPresetImageUpload}
-                  />
-                  <button
-                    type="button"
-                    className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950"
-                    onClick={handleAddCustomPreset}
-                  >
-                    Save to list
-                  </button>
-                </div>
-                {customPresetDraft.imageDataUrl || customPresetDraft.imageUrl ? (
-                  <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-4">
-                    <div className="flex items-center gap-4">
-                      <img src={customPresetDraft.imageDataUrl || customPresetDraft.imageUrl} alt={customPresetDraft.name || 'Custom preset preview'} className="h-20 w-20 rounded-2xl object-cover" />
-                      <div>
-                        <p className="font-semibold text-white">{customPresetDraft.name || 'New item preview'}</p>
-                        <p className="mt-1 text-sm text-slate-400">This will be added to the {selectedCategoryName || 'selected'} dropdown list.</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-              <p className="text-xs text-slate-400">Choose an item from the saved catalog folder and click Add, or save a missing item like Apple into this category dropdown first.</p>
-            </div>
-          ) : null}
 
           <input
             className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
@@ -1047,7 +795,7 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
                 className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
                 onChange={handleImageUpload}
               />
-              {createOnly ? <p className="text-xs text-slate-400">For a new item like Apple, upload a new image here if it is not available in the saved list.</p> : null}
+              {createOnly ? <p className="text-xs text-slate-400">Upload a product image here, or paste a direct image URL in the field beside it.</p> : null}
             </div>
           </div>
 
@@ -1258,12 +1006,128 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
     </article>
   );
 
+  const renderCategoryManager = () => (
+    <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Manage categories</h2>
+          <p className="mt-1 text-sm text-slate-300">Create, rename, and delete categories while keeping products organised under each section.</p>
+        </div>
+        <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200">{categoriesWithCounts.length} categories</span>
+      </div>
+
+      <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto]">
+        <input
+          className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
+          placeholder="Category name"
+          value={categoryDraftName}
+          onChange={(event) => setCategoryDraftName(event.target.value)}
+        />
+        <button
+          type="button"
+          className="rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+          onClick={() => void handleCategoryCreate()}
+          disabled={busyKey === 'category-create'}
+        >
+          {busyKey === 'category-create' ? 'Adding...' : 'Add category'}
+        </button>
+      </div>
+
+      <div className="mt-5 space-y-4">
+        {categoriesWithCounts.map((category) => {
+          const reassignOptions = productOptions.categories.filter((item) => item.id !== category.id);
+          return (
+            <article key={category.id} className="rounded-3xl border border-white/10 bg-slate-900/60 p-4">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div className="flex-1 space-y-3">
+                  {editingCategoryId === category.id ? (
+                    <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
+                      <input
+                        className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
+                        value={categoryEditName}
+                        onChange={(event) => setCategoryEditName(event.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                        onClick={() => void handleCategoryUpdate()}
+                        disabled={busyKey === `category-save:${category.id}`}
+                      >
+                        {busyKey === `category-save:${category.id}` ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold text-white"
+                        onClick={() => {
+                          setEditingCategoryId('');
+                          setCategoryEditName('');
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="text-lg font-bold text-white">{category.name}</h3>
+                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">{category.productCount} products</span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-400">Products in this category appear together on the owner dashboard and storefront.</p>
+                    </div>
+                  )}
+
+                  {category.productCount > 0 ? (
+                    <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
+                      <select
+                        className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white"
+                        value={categoryReassignments[category.id] ?? ''}
+                        onChange={(event) => setCategoryReassignments((current) => ({
+                          ...current,
+                          [category.id]: event.target.value
+                        }))}
+                      >
+                        <option value="">Delete products in this category</option>
+                        {reassignOptions.map((option) => (
+                          <option key={option.id} value={option.id}>Move products to {option.name}</option>
+                        ))}
+                      </select>
+                      <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-xs text-slate-400">
+                        Choose a replacement category to keep products, or leave blank to remove them.
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+
+                {editingCategoryId === category.id ? null : (
+                  <div className="flex flex-wrap gap-3">
+                    <button type="button" className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-semibold text-white" onClick={() => startEditCategory(category)}>
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-2xl border border-rose-400/30 px-4 py-2 text-sm font-semibold text-rose-100 disabled:opacity-60"
+                      onClick={() => void handleDeleteCategory(category)}
+                      disabled={busyKey === `category-delete:${category.id}`}
+                    >
+                      {busyKey === `category-delete:${category.id}` ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </article>
+          );
+        })}
+        {!categoriesWithCounts.length && !loading ? <div className="rounded-3xl border border-dashed border-white/10 bg-slate-900/40 p-6 text-sm text-slate-400">No categories found yet.</div> : null}
+      </div>
+    </section>
+  );
+
   const renderCatalogList = () => (
     <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h2 className="text-2xl font-bold">Current catalog</h2>
-          <p className="mt-1 text-sm text-slate-300">Review, search, and filter products currently live on Near Kart.</p>
+          <p className="mt-1 text-sm text-slate-300">Review, search, filter, and manage products grouped under their categories.</p>
         </div>
         <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200">{filteredProducts.length} / {products.length} products</span>
       </div>
@@ -1295,34 +1159,57 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
           ))}
         </select>
       </div>
-      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {filteredProducts.map((product) => (
-          <article key={product.id} className="rounded-3xl border border-white/10 bg-slate-900/60 p-4">
-            <img src={product.image} alt={product.name} className="h-40 w-full rounded-2xl object-cover" />
-            <div className="mt-4 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.2em] text-slate-400">
-              <span>{product.category}</span>
-              <span>{product.brand}</span>
+      <div className="mt-6 space-y-6">
+        {groupedFilteredProducts.map((group) => (
+          <div key={group.id} className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-3">
+              <div>
+                <h3 className="text-lg font-bold text-white">{group.name}</h3>
+                <p className="text-sm text-slate-400">{group.products.length} product(s) in this category</p>
+              </div>
+              <button
+                type="button"
+                className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-semibold text-white"
+                onClick={() => setProductForm((current) => ({
+                  ...current,
+                  categoryId: group.id,
+                  brandId: getDefaultBrandId(group.id, productOptions)
+                }))}
+              >
+                Add product here
+              </button>
             </div>
-            <h3 className="mt-3 text-lg font-bold text-white">{product.name}</h3>
-            <p className="mt-2 text-sm text-slate-300">{product.description}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {product.variants.map((variant) => (
-                <span key={variant.id} className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                  {variant.label} · {formatCurrency(variant.salePrice)}
-                </span>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {group.products.map((product) => (
+                <article key={product.id} className="rounded-3xl border border-white/10 bg-slate-900/60 p-4">
+                  <img src={product.image} alt={product.name} className="h-40 w-full rounded-2xl object-cover" />
+                  <div className="mt-4 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.2em] text-slate-400">
+                    <span>{product.category}</span>
+                    <span>{product.brand}</span>
+                  </div>
+                  <h3 className="mt-3 text-lg font-bold text-white">{product.name}</h3>
+                  <p className="mt-2 text-sm text-slate-300">{product.description}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {product.variants.map((variant) => (
+                      <span key={variant.id} className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                        {variant.label} · {formatCurrency(variant.salePrice)}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-5 flex gap-3">
+                    <button type="button" className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-semibold text-white" onClick={() => startEditProduct(product)}>
+                      Edit
+                    </button>
+                    <button type="button" className="rounded-2xl border border-rose-400/30 px-4 py-2 text-sm font-semibold text-rose-100 disabled:opacity-60" onClick={() => void handleDeleteProduct(product.id)} disabled={busyKey === `product-delete:${product.id}`}>
+                      {busyKey === `product-delete:${product.id}` ? 'Removing...' : 'Remove'}
+                    </button>
+                  </div>
+                </article>
               ))}
             </div>
-            <div className="mt-5 flex gap-3">
-              <button type="button" className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-semibold text-white" onClick={() => startEditProduct(product)}>
-                Edit
-              </button>
-              <button type="button" className="rounded-2xl border border-rose-400/30 px-4 py-2 text-sm font-semibold text-rose-100 disabled:opacity-60" onClick={() => void handleDeleteProduct(product.id)} disabled={busyKey === `product-delete:${product.id}`}>
-                {busyKey === `product-delete:${product.id}` ? 'Removing...' : 'Remove'}
-              </button>
-            </div>
-          </article>
+          </div>
         ))}
-        {!filteredProducts.length ? <div className="rounded-3xl border border-dashed border-white/10 bg-slate-900/40 p-6 text-sm text-slate-400">No products match the current search/filter.</div> : null}
+        {!groupedFilteredProducts.length ? <div className="rounded-3xl border border-dashed border-white/10 bg-slate-900/40 p-6 text-sm text-slate-400">No products match the current search/filter.</div> : null}
       </div>
     </section>
   );
@@ -1381,10 +1268,17 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
 
       {mode === 'customers' ? renderCustomerMonitor() : null}
       {mode === 'orders' ? renderOrderMonitor() : null}
-      {mode === 'product-add' ? renderProductForm(true) : null}
+      {mode === 'product-add' ? (
+        <>
+          {renderCategoryManager()}
+          {renderProductForm(true)}
+          {renderCatalogList()}
+        </>
+      ) : null}
 
       {mode === 'products' ? (
         <>
+          {renderCategoryManager()}
           <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
             {renderInventoryWatchlist()}
             {renderProductForm(false)}

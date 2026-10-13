@@ -16,6 +16,55 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, '');
 }
 
+async function createUniqueSlug(table: 'products' | 'categories', value: string, excludeId?: string) {
+  const baseSlug = slugify(value) || `${table.slice(0, -1)}-${Date.now()}`;
+  let slug = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    const { rows } = excludeId
+      ? await dbQuery<{ id: string }>(`SELECT id FROM ${table} WHERE slug = $1 AND id <> $2 LIMIT 1`, [slug, excludeId])
+      : await dbQuery<{ id: string }>(`SELECT id FROM ${table} WHERE slug = $1 LIMIT 1`, [slug]);
+
+    if (!rows[0]) {
+      return slug;
+    }
+
+    slug = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+}
+
+async function ensureActiveCategory(categoryId: string, message = 'Select a valid category before saving the product.') {
+  const { rows } = await dbQuery<{ id: string }>('SELECT id FROM categories WHERE id = $1 AND is_active = TRUE LIMIT 1', [categoryId]);
+  if (!rows[0]) {
+    throw new Error(message);
+  }
+}
+
+async function resolveBrandId(brandId?: string) {
+  if (brandId) {
+    const { rows } = await dbQuery<{ id: string }>('SELECT id FROM brands WHERE id = $1 AND is_active = TRUE LIMIT 1', [brandId]);
+    if (rows[0]) {
+      return rows[0].id;
+    }
+  }
+
+  const fallback = await dbQuery<{ id: string }>(
+    `SELECT id
+     FROM brands
+     WHERE is_active = TRUE
+     ORDER BY CASE WHEN name = 'Fresh Fields' THEN 0 ELSE 1 END, name ASC
+     LIMIT 1`
+  );
+
+  if (!fallback.rows[0]) {
+    throw new Error('No active brand is available for product creation.');
+  }
+
+  return fallback.rows[0].id;
+}
+
 const variantPayloadSchema = z.object({
   quantity: z.number().int().positive(),
   packType: z.enum(['g', 'ml', 'pcs']),
@@ -75,26 +124,106 @@ router.get('/product-options', asyncHandler(async (_request, response) => {
   response.json({ categories, brands });
 }));
 
+router.post('/categories', asyncHandler(async (request, response) => {
+  const payload = z.object({ name: z.string().trim().min(2) }).parse(request.body);
+  const duplicate = await dbQuery<{ id: string }>('SELECT id FROM categories WHERE LOWER(name) = LOWER($1) AND is_active = TRUE LIMIT 1', [payload.name]);
+  if (duplicate.rows[0]) {
+    throw new Error('A category with this name already exists.');
+  }
+
+  const sortOrder = await dbQuery<{ sort_order: number }>('SELECT COALESCE(MAX(sort_order), -1) + 1 AS sort_order FROM categories');
+  const categoryId = uuid();
+  const slug = await createUniqueSlug('categories', payload.name);
+
+  await dbQuery(
+    `INSERT INTO categories (id, name, slug, sort_order, is_active)
+     VALUES ($1, $2, $3, $4, TRUE)`,
+    [categoryId, payload.name, slug, Number(sortOrder.rows[0]?.sort_order ?? 0)]
+  );
+
+  response.status(201).json({ message: 'Category created', id: categoryId, slug });
+}));
+
+router.patch('/categories/:id', asyncHandler(async (request, response) => {
+  const payload = z.object({ name: z.string().trim().min(2) }).parse(request.body);
+  await ensureActiveCategory(request.params.id, 'Category not found.');
+
+  const duplicate = await dbQuery<{ id: string }>(
+    'SELECT id FROM categories WHERE LOWER(name) = LOWER($1) AND id <> $2 AND is_active = TRUE LIMIT 1',
+    [payload.name, request.params.id]
+  );
+  if (duplicate.rows[0]) {
+    throw new Error('A category with this name already exists.');
+  }
+
+  const slug = await createUniqueSlug('categories', payload.name, request.params.id);
+  await dbQuery('UPDATE categories SET name = $1, slug = $2 WHERE id = $3', [payload.name, slug, request.params.id]);
+  response.json({ message: 'Category updated', id: request.params.id, slug });
+}));
+
+router.delete('/categories/:id', asyncHandler(async (request, response) => {
+  const payload = z.object({
+    replacementCategoryId: z.string().optional(),
+    deleteProducts: z.boolean().optional()
+  }).parse(request.body ?? {});
+
+  await ensureActiveCategory(request.params.id, 'Category not found.');
+
+  if (payload.replacementCategoryId === request.params.id) {
+    throw new Error('Choose a different replacement category.');
+  }
+
+  const linkedProducts = await dbQuery<{ id: string }>('SELECT id FROM products WHERE category_id = $1 AND is_active = TRUE', [request.params.id]);
+  const productIds = linkedProducts.rows.map((row) => row.id);
+
+  if (payload.replacementCategoryId) {
+    await ensureActiveCategory(payload.replacementCategoryId, 'Choose a valid replacement category.');
+    await dbQuery('UPDATE products SET category_id = $1, updated_at = NOW() WHERE category_id = $2 AND is_active = TRUE', [payload.replacementCategoryId, request.params.id]);
+  } else if (productIds.length) {
+    if (!payload.deleteProducts) {
+      throw new Error('Choose a replacement category or confirm product deletion before removing this category.');
+    }
+
+    await dbQuery('UPDATE products SET is_active = FALSE, updated_at = NOW() WHERE id = ANY($1::uuid[])', [productIds]);
+    await dbQuery('UPDATE product_variants SET is_active = FALSE WHERE product_id = ANY($1::uuid[])', [productIds]);
+    await dbQuery(
+      `UPDATE inventories
+       SET stock_qty = 0,
+           is_in_stock = FALSE,
+           updated_at = NOW()
+       WHERE variant_id IN (
+         SELECT id FROM product_variants WHERE product_id = ANY($1::uuid[])
+       )`,
+      [productIds]
+    );
+  }
+
+  await dbQuery('UPDATE categories SET is_active = FALSE WHERE id = $1', [request.params.id]);
+  response.json({ message: 'Category deleted', id: request.params.id, productsAffected: productIds.length });
+}));
+
 router.post('/products', asyncHandler(async (request, response) => {
   const payload = z.object({
-    brandId: z.string(),
-    categoryId: z.string(),
-    name: z.string().min(2),
-    slug: z.string().min(2).optional(),
-    shortDescription: z.string().min(2),
-    longDescription: z.string().min(2),
+    brandId: z.string().optional(),
+    categoryId: z.string().min(1),
+    name: z.string().trim().min(2),
+    slug: z.string().trim().min(2).optional(),
+    shortDescription: z.string().trim().min(2),
+    longDescription: z.string().trim().min(2),
     imageDataUrl: z.string().min(10).optional(),
     imageUrl: z.string().min(10).optional(),
     variants: z.array(variantPayloadSchema).min(1)
   }).parse(request.body);
 
+  await ensureActiveCategory(payload.categoryId);
   const productId = uuid();
-  const slug = slugify(payload.slug ?? payload.name);
+  const brandId = await resolveBrandId(payload.brandId);
+  const slug = await createUniqueSlug('products', payload.slug ?? payload.name);
 
   await dbQuery(
     `INSERT INTO products (id, brand_id, category_id, name, slug, short_description, long_description, rating_avg, rating_count, is_active)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE)`,
-    [productId, payload.brandId, payload.categoryId, payload.name, slug, payload.shortDescription, payload.longDescription, 4.5, 0]
+    [productId, brandId, payload.categoryId, payload.name, slug, payload.shortDescription, payload.longDescription, 4.5, 0]
   );
 
   if (payload.imageDataUrl || payload.imageUrl) {
@@ -124,16 +253,22 @@ router.post('/products', asyncHandler(async (request, response) => {
 
 router.patch('/products/:id', asyncHandler(async (request, response) => {
   const payload = z.object({
-    name: z.string().min(2).optional(),
+    name: z.string().trim().min(2).optional(),
     brandId: z.string().optional(),
-    categoryId: z.string().optional(),
-    shortDescription: z.string().min(2).optional(),
-    longDescription: z.string().min(2).optional(),
+    categoryId: z.string().min(1).optional(),
+    shortDescription: z.string().trim().min(2).optional(),
+    longDescription: z.string().trim().min(2).optional(),
     imageDataUrl: z.string().min(10).optional(),
     imageUrl: z.string().min(10).optional(),
     isActive: z.boolean().optional(),
     variants: z.array(editableVariantPayloadSchema).min(1).optional()
   }).parse(request.body);
+
+  if (payload.categoryId) {
+    await ensureActiveCategory(payload.categoryId);
+  }
+
+  const resolvedBrandId = payload.brandId ? await resolveBrandId(payload.brandId) : null;
 
   await dbQuery(
     `UPDATE products
@@ -145,7 +280,7 @@ router.patch('/products/:id', asyncHandler(async (request, response) => {
          is_active = COALESCE($6, is_active),
          updated_at = NOW()
      WHERE id = $7`,
-    [payload.name ?? null, payload.brandId ?? null, payload.categoryId ?? null, payload.shortDescription ?? null, payload.longDescription ?? null, payload.isActive ?? null, request.params.id]
+    [payload.name ?? null, resolvedBrandId, payload.categoryId ?? null, payload.shortDescription ?? null, payload.longDescription ?? null, payload.isActive ?? null, request.params.id]
   );
 
   if (payload.imageDataUrl || payload.imageUrl) {
@@ -227,6 +362,17 @@ router.patch('/products/:id', asyncHandler(async (request, response) => {
 
 router.delete('/products/:id', asyncHandler(async (request, response) => {
   await dbQuery('UPDATE products SET is_active = FALSE, updated_at = NOW() WHERE id = $1', [request.params.id]);
+  await dbQuery('UPDATE product_variants SET is_active = FALSE WHERE product_id = $1', [request.params.id]);
+  await dbQuery(
+    `UPDATE inventories
+     SET stock_qty = 0,
+         is_in_stock = FALSE,
+         updated_at = NOW()
+     WHERE variant_id IN (
+       SELECT id FROM product_variants WHERE product_id = $1
+     )`,
+    [request.params.id]
+  );
   response.json({ message: 'Product removed from live catalog', id: request.params.id });
 }));
 
@@ -236,6 +382,7 @@ router.get('/inventory', asyncHandler(async (_request, response) => {
      FROM inventories i
      INNER JOIN product_variants pv ON pv.id = i.variant_id
      INNER JOIN products p ON p.id = pv.product_id
+     WHERE p.is_active = TRUE AND pv.is_active = TRUE
      ORDER BY p.name ASC, pv.volume_ml ASC`
   );
   response.json(rows.map((row) => ({
