@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { formatCurrency, getOrderById, CustomerOrderDetail } from '@/lib/catalog';
 
 function formatStatusLabel(value: string) {
@@ -33,7 +33,7 @@ function formatDate(value: string | null) {
   });
 }
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId') ?? '';
   const [order, setOrder] = useState<CustomerOrderDetail | null>(null);
@@ -142,5 +142,21 @@ export default function CheckoutSuccessPage() {
         </div>
       ) : null}
     </main>
+  );
+}
+
+function CheckoutSuccessFallback() {
+  return (
+    <main className="page-shell pb-16 pt-8">
+      <div className="card p-8 text-center text-sm text-muted">Loading your order confirmation...</div>
+    </main>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<CheckoutSuccessFallback />}>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }
