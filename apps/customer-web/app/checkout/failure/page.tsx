@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function CheckoutFailurePage() {
+function CheckoutFailureContent() {
   const searchParams = useSearchParams();
   const message = searchParams.get('message') || 'Your payment was not completed. No order was created.';
 
@@ -34,5 +35,21 @@ export default function CheckoutFailurePage() {
         </div>
       </article>
     </main>
+  );
+}
+
+function CheckoutFailureFallback() {
+  return (
+    <main className="page-shell pb-16 pt-8">
+      <div className="card mx-auto max-w-3xl p-8 text-center text-sm text-muted">Loading payment status...</div>
+    </main>
+  );
+}
+
+export default function CheckoutFailurePage() {
+  return (
+    <Suspense fallback={<CheckoutFailureFallback />}>
+      <CheckoutFailureContent />
+    </Suspense>
   );
 }
