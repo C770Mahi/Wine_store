@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { clearSession, AUTH_SESSION_EVENT, getStoredUser, hasStoredSession } from '@/lib/auth';
-import { CART_UPDATED_EVENT, formatCurrency, getCart, getProducts } from '@/lib/catalog';
+import { CART_UPDATED_EVENT, formatCurrency, getCart } from '@/lib/catalog';
 import type { Product } from '@/lib/catalog';
 import nearKartLogo from '../../../{EXTERNAL}_Logos/IMG_0808.png';
 
@@ -33,6 +33,7 @@ export function AppHeader() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
   const searchParamKey = searchParams.toString();
@@ -65,28 +66,45 @@ export function AppHeader() {
   }, []);
 
   useEffect(() => {
-    const query = searchQuery.trim();
+    const query = searchQuery.trim().replace(/\s+/g, ' ');
     if (!query) {
       setSearchResults([]);
+      setSearchError('');
       setIsSearchLoading(false);
       return;
     }
 
-    let isCancelled = false;
+    const controller = new AbortController();
     setIsSearchLoading(true);
+    setSearchError('');
 
-    void getProducts({ search: query }).then((products) => {
-      if (isCancelled) {
-        return;
-      }
+    void fetch(`/api/catalog/search?q=${encodeURIComponent(query)}`, {
+      cache: 'no-store',
+      signal: controller.signal
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({ message: 'Unable to search products right now.' }));
+          throw new Error(payload.message || 'Unable to search products right now.');
+        }
 
-      setSearchResults(products);
-      setIsSearchLoading(false);
-    });
+        return response.json() as Promise<Product[]>;
+      })
+      .then((products) => {
+        setSearchResults(products);
+        setIsSearchLoading(false);
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) {
+          return;
+        }
 
-    return () => {
-      isCancelled = true;
-    };
+        setSearchResults([]);
+        setSearchError(error instanceof Error ? error.message : 'Unable to search products right now.');
+        setIsSearchLoading(false);
+      });
+
+    return () => controller.abort();
   }, [searchQuery]);
 
   useEffect(() => {
@@ -104,7 +122,7 @@ export function AppHeader() {
     setIsSearchOpen(false);
   }, [pathname, searchParamKey]);
 
-  const normalizedSearchQuery = searchQuery.trim();
+  const normalizedSearchQuery = searchQuery.trim().replace(/\s+/g, ' ');
   const showSearchPanel = isSearchOpen && normalizedSearchQuery.length > 0;
 
   const authControls = !authReady || hasSession
@@ -171,6 +189,8 @@ export function AppHeader() {
                   <div className="max-h-[28rem] overflow-y-auto p-3 sm:p-4">
                     {isSearchLoading ? (
                       <div className="rounded-2xl bg-slate-50 px-4 py-6 text-center text-sm text-muted">Searching...</div>
+                    ) : searchError ? (
+                      <div className="rounded-2xl bg-rose-50 px-4 py-6 text-center text-sm text-rose-700">{searchError}</div>
                     ) : searchResults.length ? (
                       <div className="space-y-3">
                         {searchResults.map((product) => {
