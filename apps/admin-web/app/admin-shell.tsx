@@ -8,7 +8,8 @@ const navigationItems = [
   { href: '/customers', label: 'Customers' },
   { href: '/orders', label: 'Orders' },
   { href: '/products/add', label: 'Add Product' },
-  { href: '/products', label: 'Manage Products' }
+  { href: '/products', label: 'Manage Products' },
+  { href: '/categories', label: 'Manage Categories' }
 ];
 
 function isActive(pathname: string, href: string) {
@@ -32,7 +33,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 py-5">
           <div>
             <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">Near Kart admin</p>
-            <p className="mt-2 text-sm text-slate-400">Separate workspaces for dashboard, customers, orders, and products.</p>
+            <p className="mt-2 text-sm text-slate-400">Separate workspaces for dashboard, customers, orders, products, and categories.</p>
           </div>
           <nav className="flex flex-wrap gap-3">
             {navigationItems.map((item) => {

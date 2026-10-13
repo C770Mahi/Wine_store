@@ -6,7 +6,7 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1';
 const orderStatuses = ['created', 'confirmed', 'packed', 'assigned', 'picked_up', 'delivered', 'cancelled'];
 
-type AdminPageMode = 'overview' | 'customers' | 'orders' | 'products' | 'product-add';
+type AdminPageMode = 'overview' | 'customers' | 'orders' | 'products' | 'product-add' | 'categories';
 
 type DashboardData = {
   ordersToday: number;
@@ -243,6 +243,11 @@ const pageMeta: Record<AdminPageMode, { eyebrow: string; title: string; descript
     eyebrow: 'Add products',
     title: 'Create a new product',
     description: 'Add a new product with image, pricing, pack variants, and stock, then let it appear first on the storefront.'
+  },
+  categories: {
+    eyebrow: 'Manage categories',
+    title: 'Category manager',
+    description: 'Create, rename, and delete catalog categories from one dedicated workspace.'
   }
 };
 
@@ -251,7 +256,8 @@ const quickLinks = [
   { href: '/customers', label: 'Customers', description: 'Customer monitor page' },
   { href: '/orders', label: 'Orders', description: 'Order tracking and status updates' },
   { href: '/products/add', label: 'Add product', description: 'Create new catalog items' },
-  { href: '/products', label: 'Manage products', description: 'Edit, remove, and search products' }
+  { href: '/products', label: 'Manage products', description: 'Edit, remove, and search products' },
+  { href: '/categories', label: 'Manage categories', description: 'Create, rename, and remove categories' }
 ];
 
 export function AdminConsole({ mode }: { mode: AdminPageMode }) {
@@ -1195,6 +1201,11 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
               Manage products
             </Link>
           ) : null}
+          {mode === 'categories' ? (
+            <Link href="/products" className="rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold text-white">
+              Manage products
+            </Link>
+          ) : null}
         </div>
       </header>
 
@@ -1230,17 +1241,11 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
 
       {mode === 'customers' ? renderCustomerMonitor() : null}
       {mode === 'orders' ? renderOrderMonitor() : null}
-      {mode === 'product-add' ? (
-        <>
-          {renderCategoryManager()}
-          {renderProductForm(true)}
-          {renderCatalogList()}
-        </>
-      ) : null}
+      {mode === 'product-add' ? renderProductForm(true) : null}
+      {mode === 'categories' ? renderCategoryManager() : null}
 
       {mode === 'products' ? (
         <>
-          {renderCategoryManager()}
           <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
             {renderInventoryWatchlist()}
             {renderProductForm(false)}
