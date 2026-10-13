@@ -48,10 +48,10 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="page-shell flex min-h-[70vh] items-center justify-center py-16">
-      <div className="card w-full max-w-xl p-8">
+    <main className="page-shell flex min-h-[70vh] items-center justify-center py-10 sm:py-16">
+      <div className="card w-full max-w-xl p-5 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Forgot password</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-ink">Reset using mobile OTP or email</h1>
+        <h1 className="mt-2 text-2xl font-black tracking-tight text-ink sm:text-3xl">Reset using mobile OTP or email</h1>
 
         <form className="mt-6 space-y-4" onSubmit={handleSend}>
           <input className="w-full rounded-2xl border border-slate-200 px-4 py-3" placeholder="Enter mobile or email" value={identifier} onChange={(event) => setIdentifier(event.target.value)} />

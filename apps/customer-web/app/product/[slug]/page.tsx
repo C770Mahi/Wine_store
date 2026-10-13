@@ -16,15 +16,15 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
     <main className="page-shell pb-16 pt-8">
       <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
         <div className="card overflow-hidden">
-          <img src={product.image} alt={product.name} className="min-h-[420px] w-full object-cover" />
+          <img src={product.image} alt={product.name} className="min-h-[280px] w-full object-cover sm:min-h-[360px] lg:min-h-[420px]" />
         </div>
-        <section className="card p-8">
+        <section className="card p-5 sm:p-8">
           <div className="flex flex-wrap gap-2 text-sm font-semibold text-muted">
             <span className="chip">{product.category}</span>
             <span className="chip">{product.brand}</span>
             <span className="chip">⭐ {product.rating}</span>
           </div>
-          <h1 className="mt-5 text-4xl font-black tracking-tight text-ink">{product.name}</h1>
+          <h1 className="mt-5 text-3xl font-black tracking-tight text-ink sm:text-4xl">{product.name}</h1>
           <p className="mt-3 text-base text-muted">{product.description}</p>
 
           <div className="mt-6 rounded-3xl bg-brand-soft p-5">
@@ -62,7 +62,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
         <section className="mt-10">
           <div className="mb-5">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Related products</p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight text-ink">You may also like</h2>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-ink sm:text-3xl">You may also like</h2>
           </div>
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {relatedProducts.map((item) => (

@@ -48,10 +48,10 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="page-shell flex min-h-[70vh] items-center justify-center py-16">
-      <div className="card w-full max-w-2xl p-8">
+    <main className="page-shell flex min-h-[70vh] items-center justify-center py-10 sm:py-16">
+      <div className="card w-full max-w-2xl p-5 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Create account</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-ink">Sign up with mobile OTP</h1>
+        <h1 className="mt-2 text-2xl font-black tracking-tight text-ink sm:text-3xl">Sign up with mobile OTP</h1>
 
         <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={handleSignup}>
           <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Full name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />

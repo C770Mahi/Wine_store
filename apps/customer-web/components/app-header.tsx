@@ -52,11 +52,11 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="page-shell pt-1 pb-4 pl-1 pr-4 sm:pl-3 sm:pr-6 lg:pl-4 lg:pr-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex items-start gap-4">
-            <Link href="/" className="flex items-center gap-1">
-              <Image src={nearKartLogo} alt="Near Kart" className="h-24 w-auto max-w-[340px] sm:h-28 sm:max-w-[440px] lg:max-w-[500px]" priority />
+      <div className="page-shell pb-3 pt-2 sm:pb-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+            <Link href="/" className="flex items-center gap-2 self-start">
+              <Image src={nearKartLogo} alt="Near Kart" className="h-16 w-auto max-w-[180px] sm:h-24 sm:max-w-[340px] lg:h-28 lg:max-w-[440px]" priority />
               <div className="hidden sm:block">
                 <p className="text-base font-bold text-ink">Near Kart</p>
                 <p className="text-xs text-muted">Neighbourhood store</p>
@@ -67,26 +67,26 @@ export function AppHeader() {
             </div>
           </div>
 
-          <div className="flex flex-1 items-center gap-3 lg:max-w-2xl">
-            <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:max-w-2xl">
+            <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 sm:px-4 sm:py-3">
               <span className="text-slate-400">🔎</span>
               <input className="w-full bg-transparent text-sm outline-none" placeholder="Search products, categories, offers" />
             </div>
-            <Link href="/cart" className="btn-primary whitespace-nowrap px-4">
+            <Link href="/cart" className="btn-primary w-full justify-center whitespace-nowrap px-4 sm:w-auto">
               Cart{cartCount ? ` (${cartCount})` : ''}
             </Link>
           </div>
         </div>
 
         <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <nav className="flex gap-3 overflow-x-auto pb-1">
+          <nav className="flex gap-2 overflow-x-auto pb-1 pr-1">
             {navItems.map((item) => {
               const isActive = pathname === '/shop' && searchParams.get('category') === item.category;
               return (
                 <Link
                   key={item.label}
                   href={{ pathname: '/shop' as Route, query: { category: item.category } }}
-                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600'}`}
+                  className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition sm:px-4 sm:text-sm ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600'}`}
                 >
                   {item.label}
                 </Link>
@@ -94,10 +94,10 @@ export function AppHeader() {
             })}
           </nav>
 
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex flex-wrap items-center gap-2 text-sm sm:gap-3">
             {userName ? (
               <>
-                <span className="font-semibold text-ink">Hi, {userName}</span>
+                <span className="max-w-[180px] truncate font-semibold text-ink">Hi, {userName}</span>
                 <button type="button" className="chip" onClick={clearSession}>Logout</button>
               </>
             ) : (

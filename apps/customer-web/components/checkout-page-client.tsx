@@ -105,9 +105,9 @@ export function CheckoutPageClient() {
       <article className="card p-8 text-center">
         <h2 className="text-2xl font-bold text-ink">Please sign in to continue checkout</h2>
         <p className="mt-2 text-sm text-muted">Your address book and orders are tied to your account session.</p>
-        <div className="mt-5 flex justify-center gap-3">
-          <Link href="/auth/login" className="btn-primary">Login</Link>
-          <Link href="/auth/signup" className="btn-secondary">Create account</Link>
+        <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+          <Link href="/auth/login" className="btn-primary w-full sm:w-auto">Login</Link>
+          <Link href="/auth/signup" className="btn-secondary w-full sm:w-auto">Create account</Link>
         </div>
       </article>
     );

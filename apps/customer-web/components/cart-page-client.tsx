@@ -94,7 +94,7 @@ export function CartPageClient({ initialCart = emptyCart }: CartPageClientProps)
                 <button type="button" className="font-semibold text-brand" onClick={() => mutateCart(() => removeCartItemRequest(item.id), 'Item removed.', item.id)} disabled={loadingItemId === item.id}>Remove</button>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-normal">
               <div className="flex items-center gap-2 rounded-full border border-slate-200 px-2 py-1">
                 <button type="button" className="h-8 w-8 rounded-full bg-slate-100 text-sm font-bold text-ink" onClick={() => mutateCart(() => updateCartItemRequest(item.id, Math.max(1, item.quantity - 1)), 'Cart updated.', item.id)} disabled={loadingItemId === item.id || item.quantity <= 1}>-</button>
                 <span className="min-w-8 text-center text-sm font-semibold text-ink">{item.quantity}</span>
@@ -114,7 +114,7 @@ export function CartPageClient({ initialCart = emptyCart }: CartPageClientProps)
 
       <aside className="card h-fit p-6">
         <h2 className="text-xl font-bold text-ink">Cart summary</h2>
-        <form className="mt-5 flex gap-2" onSubmit={handleCouponSubmit}>
+        <form className="mt-5 flex flex-col gap-2 sm:flex-row" onSubmit={handleCouponSubmit}>
           <input className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm" placeholder="Enter coupon" value={couponCode} onChange={(event) => setCouponCode(event.target.value)} />
           <button className="btn-secondary px-4 py-3 text-sm" disabled={loadingItemId === 'global'}>Apply</button>
         </form>

@@ -48,14 +48,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     <main className="page-shell pb-16 pt-8">
       <div className="mb-8 flex flex-col gap-3">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Product listing</p>
-        <h1 className="text-4xl font-black tracking-tight text-ink">Browse Near Kart collections</h1>
+        <h1 className="text-3xl font-black tracking-tight text-ink sm:text-4xl">Browse Near Kart collections</h1>
         <p className="max-w-3xl text-sm text-muted">API-backed listing page with category, brand, search, and filter scaffolding for fast neighbourhood shopping.</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
         <FilterSidebar brands={filterGroups.brands} volumes={filterGroups.volumes} priceBands={filterGroups.priceBands} />
         <section>
-          <div className="mb-5 flex items-center justify-between rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-card">
+          <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <div>
               <p className="font-semibold text-ink">{products.length} products available</p>
               <p className="text-sm text-muted">Connected to the Express API for real catalog responses.</p>

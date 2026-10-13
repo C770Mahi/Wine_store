@@ -52,12 +52,12 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="page-shell flex min-h-[70vh] items-center justify-center py-16">
-      <div className="card w-full max-w-xl p-8">
+    <main className="page-shell flex min-h-[70vh] items-center justify-center py-10 sm:py-16">
+      <div className="card w-full max-w-xl p-5 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Login</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-ink">Sign in with mobile, email or OTP</h1>
+        <h1 className="mt-2 text-2xl font-black tracking-tight text-ink sm:text-3xl">Sign in with mobile, email or OTP</h1>
 
-        <div className="mt-5 flex gap-3">
+        <div className="mt-5 flex flex-wrap gap-3">
           <button type="button" className={`chip ${mode === 'password' ? 'bg-brand text-white border-brand' : ''}`} onClick={() => setMode('password')}>Password</button>
           <button type="button" className={`chip ${mode === 'otp' ? 'bg-brand text-white border-brand' : ''}`} onClick={() => setMode('otp')}>OTP</button>
         </div>
@@ -74,13 +74,13 @@ export default function LoginPage() {
           {message ? <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{message}</div> : null}
           {error ? <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
 
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             {mode === 'otp' ? <button type="button" className="btn-secondary flex-1" onClick={handleSendOtp} disabled={loading}>Resend OTP</button> : <button type="button" className="btn-secondary flex-1" onClick={handleSendOtp} disabled={loading}>Send OTP</button>}
             <button className="btn-primary flex-1" disabled={loading}>{loading ? 'Please wait...' : 'Continue'}</button>
           </div>
         </form>
 
-        <div className="mt-6 flex items-center justify-between text-sm text-muted">
+        <div className="mt-6 flex flex-col gap-2 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
           <Link href="/auth/forgot-password" className="font-semibold text-brand">Forgot password?</Link>
           <Link href="/auth/signup" className="font-semibold text-brand">Create account</Link>
         </div>
