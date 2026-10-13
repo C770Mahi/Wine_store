@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { clearSession, AUTH_SESSION_EVENT, getStoredUser } from '@/lib/auth';
+import { clearSession, AUTH_SESSION_EVENT, getStoredUser, hasStoredSession } from '@/lib/auth';
 import { CART_UPDATED_EVENT, getCart } from '@/lib/catalog';
 import nearKartLogo from '../../../{EXTERNAL}_Logos/IMG_0808.png';
 
@@ -26,11 +26,15 @@ export function AppHeader() {
   const searchParams = useSearchParams();
   const [cartCount, setCartCount] = useState(0);
   const [userName, setUserName] = useState('');
+  const [hasSession, setHasSession] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     const syncState = async () => {
       const storedUser = getStoredUser();
+      setHasSession(hasStoredSession());
       setUserName(storedUser?.name ?? '');
+      setAuthReady(true);
 
       try {
         const cart = await getCart();
@@ -49,6 +53,22 @@ export function AppHeader() {
       window.removeEventListener(AUTH_SESSION_EVENT, syncState);
     };
   }, []);
+
+  const authControls = !authReady
+    ? null
+    : hasSession
+      ? (
+          <>
+            {userName ? <span className="max-w-[180px] truncate font-semibold text-ink">Hi, {userName}</span> : null}
+            <button type="button" className="chip" onClick={clearSession}>Logout</button>
+          </>
+        )
+      : (
+          <>
+            <Link href="/auth/login" className="font-semibold text-brand">Login</Link>
+            <Link href="/auth/signup" className="chip">Sign up</Link>
+          </>
+        );
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -94,18 +114,8 @@ export function AppHeader() {
             })}
           </nav>
 
-          <div className="flex flex-wrap items-center gap-2 text-sm sm:gap-3">
-            {userName ? (
-              <>
-                <span className="max-w-[180px] truncate font-semibold text-ink">Hi, {userName}</span>
-                <button type="button" className="chip" onClick={clearSession}>Logout</button>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/login" className="font-semibold text-brand">Login</Link>
-                <Link href="/auth/signup" className="chip">Sign up</Link>
-              </>
-            )}
+          <div className="flex min-h-10 flex-wrap items-center gap-2 text-sm sm:gap-3">
+            {authControls}
           </div>
         </div>
       </div>

@@ -1,8 +1,7 @@
 import { Suspense } from 'react';
-import { FilterSidebar } from '@/components/filter-sidebar';
 import { ProductCard } from '@/components/product-card';
 import { ShopSortControl } from '@/components/shop-sort-control';
-import { Product, buildFilterGroups, getBrands, getProducts } from '@/lib/catalog';
+import { Product, getProducts } from '@/lib/catalog';
 
 interface ShopPageProps {
   searchParams?: {
@@ -32,45 +31,36 @@ function sortProducts(products: Product[], sort: string) {
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const sort = searchParams?.sort ?? 'newest';
-  const [productsResponse, brands] = await Promise.all([
-    getProducts({
-      category: searchParams?.category,
-      search: searchParams?.search,
-      brand: searchParams?.brand
-    }),
-    getBrands()
-  ]);
-  const products = sortProducts(productsResponse, sort);
-
-  const filterGroups = buildFilterGroups(products, brands);
+  const products = sortProducts(await getProducts({
+    category: searchParams?.category,
+    search: searchParams?.search,
+    brand: searchParams?.brand
+  }), sort);
 
   return (
     <main className="page-shell pb-16 pt-8">
       <div className="mb-8 flex flex-col gap-3">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Product listing</p>
         <h1 className="text-3xl font-black tracking-tight text-ink sm:text-4xl">Browse Near Kart collections</h1>
-        <p className="max-w-3xl text-sm text-muted">API-backed listing page with category, brand, search, and filter scaffolding for fast neighbourhood shopping.</p>
+        <p className="max-w-3xl text-sm text-muted">API-backed listing page with category search and fast neighbourhood shopping.</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-        <FilterSidebar brands={filterGroups.brands} volumes={filterGroups.volumes} priceBands={filterGroups.priceBands} />
-        <section>
-          <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <div>
-              <p className="font-semibold text-ink">{products.length} products available</p>
-              <p className="text-sm text-muted">Connected to the Express API for real catalog responses.</p>
-            </div>
-            <Suspense fallback={<div className="chip">Sort: Newest first</div>}>
-              <ShopSortControl value={sort} />
-            </Suspense>
+      <section>
+        <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div>
+            <p className="font-semibold text-ink">{products.length} products available</p>
+            <p className="text-sm text-muted">Connected to the Express API for real catalog responses.</p>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
-      </div>
+          <Suspense fallback={<div className="chip">Sort: Newest first</div>}>
+            <ShopSortControl value={sort} />
+          </Suspense>
+        </div>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
