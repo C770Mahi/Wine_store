@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { FilterSidebar } from '@/components/filter-sidebar';
 import { ProductCard } from '@/components/product-card';
 import { ShopSortControl } from '@/components/shop-sort-control';
@@ -59,7 +60,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               <p className="font-semibold text-ink">{products.length} products available</p>
               <p className="text-sm text-muted">Connected to the Express API for real catalog responses.</p>
             </div>
-            <ShopSortControl value={sort} />
+            <Suspense fallback={<div className="chip">Sort: Newest first</div>}>
+              <ShopSortControl value={sort} />
+            </Suspense>
           </div>
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {products.map((product) => (

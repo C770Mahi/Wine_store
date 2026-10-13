@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import './globals.css';
 import { AppHeader } from '@/components/app-header';
 
@@ -11,7 +12,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <AppHeader />
+        <Suspense fallback={null}>
+          <AppHeader />
+        </Suspense>
         {children}
         <footer className="mt-16 border-t border-slate-200 bg-white">
           <div className="page-shell grid gap-8 py-10 md:grid-cols-3">
