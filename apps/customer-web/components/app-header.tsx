@@ -4,9 +4,10 @@ import type { Route } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { clearSession, AUTH_SESSION_EVENT, getStoredUser, hasStoredSession } from '@/lib/auth';
-import { CART_UPDATED_EVENT, getCart } from '@/lib/catalog';
+import { CART_UPDATED_EVENT, formatCurrency, getCart, getProducts } from '@/lib/catalog';
+import type { Product } from '@/lib/catalog';
 import nearKartLogo from '../../../{EXTERNAL}_Logos/IMG_0808.png';
 
 const navItems = [
@@ -29,6 +30,12 @@ export function AppHeader() {
   const [userMobile, setUserMobile] = useState('');
   const [hasSession, setHasSession] = useState(false);
   const [authReady, setAuthReady] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement | null>(null);
+  const searchParamKey = searchParams.toString();
   const isShopPage = pathname === '/shop';
 
   useEffect(() => {
@@ -56,6 +63,49 @@ export function AppHeader() {
       window.removeEventListener(AUTH_SESSION_EVENT, syncState);
     };
   }, []);
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (!query) {
+      setSearchResults([]);
+      setIsSearchLoading(false);
+      return;
+    }
+
+    let isCancelled = false;
+    setIsSearchLoading(true);
+
+    void getProducts({ search: query }).then((products) => {
+      if (isCancelled) {
+        return;
+      }
+
+      setSearchResults(products);
+      setIsSearchLoading(false);
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!searchContainerRef.current?.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, []);
+
+  useEffect(() => {
+    setIsSearchOpen(false);
+  }, [pathname, searchParamKey]);
+
+  const normalizedSearchQuery = searchQuery.trim();
+  const showSearchPanel = isSearchOpen && normalizedSearchQuery.length > 0;
 
   const authControls = !authReady || hasSession
     ? null
@@ -101,9 +151,71 @@ export function AppHeader() {
           </div>
 
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:max-w-3xl lg:justify-end">
-            <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 sm:px-4 sm:py-3">
-              <span className="text-slate-400">🔎</span>
-              <input className="w-full bg-transparent text-sm outline-none" placeholder="Search products, categories, offers" />
+            <div ref={searchContainerRef} className="relative w-full">
+              <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 sm:px-4 sm:py-3">
+                <span className="text-slate-400">🔎</span>
+                <input
+                  value={searchQuery}
+                  onChange={(event) => {
+                    setSearchQuery(event.target.value);
+                    setIsSearchOpen(true);
+                  }}
+                  onFocus={() => setIsSearchOpen(true)}
+                  className="w-full bg-transparent text-sm outline-none"
+                  placeholder="Search products, categories, offers"
+                />
+              </div>
+
+              {showSearchPanel ? (
+                <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-40 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-card">
+                  <div className="max-h-[28rem] overflow-y-auto p-3 sm:p-4">
+                    {isSearchLoading ? (
+                      <div className="rounded-2xl bg-slate-50 px-4 py-6 text-center text-sm text-muted">Searching...</div>
+                    ) : searchResults.length ? (
+                      <div className="space-y-3">
+                        {searchResults.map((product) => {
+                          const lowestVariant = product.variants[0];
+                          return (
+                            <Link
+                              key={product.id}
+                              href={`/product/${product.slug}`}
+                              className="flex gap-3 rounded-2xl border border-slate-100 p-3 transition hover:border-brand/30 hover:bg-slate-50"
+                              onClick={() => setIsSearchOpen(false)}
+                            >
+                              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                                <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-bold text-ink">{product.name}</p>
+                                    <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand">{product.category}</p>
+                                  </div>
+                                  <span className="shrink-0 text-xs font-semibold text-muted">{product.eta}</span>
+                                </div>
+                                <p className="mt-2 line-clamp-2 text-sm text-muted">{product.description}</p>
+                                <div className="mt-2 flex items-center justify-between gap-3">
+                                  <span className="text-sm font-extrabold text-ink">{lowestVariant ? formatCurrency(lowestVariant.salePrice) : '—'}</span>
+                                  <span className="truncate text-xs text-muted">{product.brand}</span>
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                        <Link
+                          href={`/shop?search=${encodeURIComponent(normalizedSearchQuery)}`}
+                          className="flex items-center justify-center rounded-2xl bg-brand-soft px-4 py-3 text-sm font-semibold text-brand-dark"
+                          onClick={() => setIsSearchOpen(false)}
+                        >
+                          View all results
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl bg-slate-50 px-4 py-6 text-center text-sm text-muted">No results found</div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
             </div>
             <Link href="/cart" className="btn-primary w-full justify-center whitespace-nowrap px-4 sm:w-auto">
               Cart{cartCount ? ` (${cartCount})` : ''}

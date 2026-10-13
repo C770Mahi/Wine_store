@@ -144,7 +144,7 @@ export async function listProducts(filters: ProductFilters = {}) {
 
   if (filters.search) {
     params.push(`%${filters.search.toLowerCase()}%`);
-    clauses.push(`LOWER(p.name || ' ' || b.name || ' ' || c.name) LIKE $${params.length}`);
+    clauses.push(`LOWER(p.name || ' ' || b.name || ' ' || c.name || ' ' || COALESCE(p.short_description, '') || ' ' || COALESCE(p.long_description, '')) LIKE $${params.length}`);
   }
 
   const { rows } = await dbQuery(
