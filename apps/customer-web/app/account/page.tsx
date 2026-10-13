@@ -136,7 +136,7 @@ export default function AccountPage() {
 
       <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">
-          <article className="card p-6 sm:p-8">
+          <article className="card p-5 sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand text-2xl font-black text-white">
@@ -147,10 +147,10 @@ export default function AccountPage() {
                   <p className="mt-1 text-sm text-muted">Near Kart customer account</p>
                 </div>
               </div>
-              <Link href="/shop" className="btn-secondary w-full justify-center sm:w-auto">Continue shopping</Link>
+              <Link href="/shop" className="btn-secondary min-h-[44px] w-full justify-center sm:w-auto">Continue shopping</Link>
             </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-6 grid gap-4 min-[390px]:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-3xl bg-slate-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Mobile number</p>
                 <p className="mt-2 font-semibold text-ink">{profile?.mobile ?? 'Not available'}</p>
@@ -170,13 +170,13 @@ export default function AccountPage() {
             </div>
           </article>
 
-          <article className="card p-6 sm:p-8">
+          <article className="card p-5 sm:p-8">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-2xl font-black tracking-tight text-ink">Order history</h2>
                 <p className="mt-1 text-sm text-muted">See your recent Near Kart orders, payment references, and live delivery progress.</p>
               </div>
-              <Link href="/checkout" className="text-sm font-semibold text-brand">Place another order</Link>
+              <Link href="/checkout" className="inline-flex min-h-[44px] items-center text-sm font-semibold text-brand">Place another order</Link>
             </div>
 
             {orders.length ? (
@@ -199,7 +199,7 @@ export default function AccountPage() {
                           <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(order.paymentStatus)}`}>{formatStatusLabel(order.paymentStatus)}</span>
                         </div>
                       </div>
-                      <div className="mt-4 grid gap-3 text-sm text-muted sm:grid-cols-4">
+                      <div className="mt-4 grid gap-3 text-sm text-muted min-[390px]:grid-cols-2 sm:grid-cols-4">
                         <div className="rounded-2xl bg-slate-50 px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Total</p>
                           <p className="mt-2 font-semibold text-ink">{formatCurrency(order.grandTotal)}</p>
@@ -223,11 +223,11 @@ export default function AccountPage() {
                           <p className="mt-2 font-semibold text-ink">{order.deliveryAddress}</p>
                         </div>
                       ) : null}
-                      <div className="mt-4 flex flex-wrap gap-3">
-                        <button type="button" className="btn-secondary" onClick={() => void handleTrackOrder(order.id)}>
+                      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                        <button type="button" className="btn-secondary min-h-[44px] w-full sm:w-auto" onClick={() => void handleTrackOrder(order.id)}>
                           {isExpanded ? 'Hide tracking' : isTrackingLoading ? 'Loading tracking...' : 'Track order'}
                         </button>
-                        {order.googleMapsLink ? <a href={order.googleMapsLink} target="_blank" rel="noreferrer" className="btn-secondary">View on map</a> : null}
+                        {order.googleMapsLink ? <a href={order.googleMapsLink} target="_blank" rel="noreferrer" className="btn-secondary min-h-[44px] w-full sm:w-auto">View on map</a> : null}
                       </div>
                       {isExpanded ? (
                         <div className="mt-4 rounded-3xl bg-slate-50 p-4">

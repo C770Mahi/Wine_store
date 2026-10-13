@@ -48,25 +48,25 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="page-shell flex min-h-[70vh] items-center justify-center py-10 sm:py-16">
+    <main className="page-shell flex min-h-[70vh] items-center justify-center py-8 sm:py-16">
       <div className="card w-full max-w-2xl p-5 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Create account</p>
         <h1 className="mt-2 text-2xl font-black tracking-tight text-ink sm:text-3xl">Sign up with mobile OTP</h1>
 
         <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={handleSignup}>
-          <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Full name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
-          <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Mobile number" value={form.mobile} onChange={(event) => setForm((current) => ({ ...current, mobile: event.target.value }))} />
-          <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Email address" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
-          <input className="rounded-2xl border border-slate-200 px-4 py-3" type="password" placeholder="Password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} />
-          <button className="btn-primary sm:col-span-2" disabled={loading}>{loading ? 'Please wait...' : 'Create account & send OTP'}</button>
+          <input className="rounded-2xl border border-slate-200 px-4 py-3 text-base" placeholder="Full name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
+          <input className="rounded-2xl border border-slate-200 px-4 py-3 text-base" placeholder="Mobile number" value={form.mobile} onChange={(event) => setForm((current) => ({ ...current, mobile: event.target.value }))} />
+          <input className="rounded-2xl border border-slate-200 px-4 py-3 text-base" placeholder="Email address" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
+          <input className="rounded-2xl border border-slate-200 px-4 py-3 text-base" type="password" placeholder="Password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} />
+          <button className="btn-primary min-h-[44px] sm:col-span-2" disabled={loading}>{loading ? 'Please wait...' : 'Create account & send OTP'}</button>
         </form>
 
         {phase !== 'signup' ? (
           <div className="mt-6 space-y-4 rounded-3xl border border-slate-200 p-5">
             <h2 className="text-lg font-bold text-ink">Verify your mobile OTP</h2>
-            <input className="w-full rounded-2xl border border-slate-200 px-4 py-3" placeholder="Enter 6-digit OTP" value={otp} onChange={(event) => setOtp(event.target.value)} />
+            <input className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base" placeholder="Enter 6-digit OTP" value={otp} onChange={(event) => setOtp(event.target.value)} />
             {previewCode ? <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">OTP preview fallback: <strong>{previewCode}</strong></div> : null}
-            <button type="button" className="btn-primary w-full" onClick={handleVerifyOtp} disabled={loading || phase === 'done'}>{phase === 'done' ? 'Verified' : 'Verify OTP'}</button>
+            <button type="button" className="btn-primary min-h-[44px] w-full" onClick={handleVerifyOtp} disabled={loading || phase === 'done'}>{phase === 'done' ? 'Verified' : 'Verify OTP'}</button>
           </div>
         ) : null}
 

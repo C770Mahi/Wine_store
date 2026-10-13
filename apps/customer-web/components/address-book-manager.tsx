@@ -469,23 +469,23 @@ export function AddressBookManager({
     <article className="card p-6 sm:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-black tracking-tight text-ink">{title}</h2>
+          <h2 className="text-xl font-black tracking-tight text-ink sm:text-2xl">{title}</h2>
           <p className="mt-1 text-sm text-muted">{subtitle}</p>
         </div>
-        <button type="button" className="btn-primary" onClick={openNewAddress}>Add new address</button>
+        <button type="button" className="btn-primary min-h-[44px] w-full sm:w-auto" onClick={openNewAddress}>Add new address</button>
       </div>
 
       {notice ? <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</div> : null}
       {error ? <div className="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
 
       {isEditorOpen ? (
-        <div className="mt-6 space-y-4 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+        <div className="mt-6 space-y-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-lg font-bold text-ink">{editingAddressId ? 'Edit address' : 'Add a new address'}</p>
               <p className="text-sm text-muted">Pin the location on Google Maps and save the delivery details.</p>
             </div>
-            <button type="button" className="btn-secondary" onClick={() => { setIsEditorOpen(false); resetMapBindings(); resetForm(); }}>Cancel</button>
+            <button type="button" className="btn-secondary min-h-[44px] w-full sm:w-auto" onClick={() => { setIsEditorOpen(false); resetMapBindings(); resetForm(); }}>Cancel</button>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -529,11 +529,11 @@ export function AddressBookManager({
                 <p className="font-semibold text-ink">Google Maps location</p>
                 <p className="text-sm text-muted">Search, drag the pin, or use your current location to auto-fill the address. You can also enter the address manually and save without a map pin.</p>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <button type="button" className="btn-secondary" onClick={handleUseCurrentLocation} disabled={busyKey === 'current-location'}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <button type="button" className="btn-secondary min-h-[44px] w-full sm:w-auto" onClick={handleUseCurrentLocation} disabled={busyKey === 'current-location'}>
                   {busyKey === 'current-location' ? 'Locating...' : 'Use current location'}
                 </button>
-                {typeof form.latitude === 'number' && typeof form.longitude === 'number' ? <a href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`} target="_blank" rel="noreferrer" className="btn-secondary">Open in Maps</a> : null}
+                {typeof form.latitude === 'number' && typeof form.longitude === 'number' ? <a href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`} target="_blank" rel="noreferrer" className="btn-secondary min-h-[44px] w-full sm:w-auto">Open in Maps</a> : null}
               </div>
             </div>
 
@@ -546,13 +546,13 @@ export function AddressBookManager({
                 onChange={(event) => setSearchValue(event.target.value)}
                 disabled={!GOOGLE_MAPS_API_KEY}
               />
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 text-sm text-muted">
+              <div className="grid gap-3 text-sm text-muted min-[390px]:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Latitude</span><div className="mt-2 font-semibold text-ink">{typeof form.latitude === 'number' ? form.latitude.toFixed(6) : 'Optional'}</div></div>
                 <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Longitude</span><div className="mt-2 font-semibold text-ink">{typeof form.longitude === 'number' ? form.longitude.toFixed(6) : 'Optional'}</div></div>
-                <div className="rounded-2xl bg-slate-50 px-4 py-3 sm:col-span-2"><span className="text-xs uppercase tracking-[0.18em] text-brand">Detected address</span><div className="mt-2 font-semibold text-ink">{form.formattedAddress || 'Pick a location on the map to auto-fill this address, or enter it manually below.'}</div></div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 min-[390px]:col-span-2"><span className="text-xs uppercase tracking-[0.18em] text-brand">Detected address</span><div className="mt-2 font-semibold text-ink break-words">{form.formattedAddress || 'Pick a location on the map to auto-fill this address, or enter it manually below.'}</div></div>
               </div>
               {GOOGLE_MAPS_API_KEY ? (
-                <div ref={mapRef} className="h-72 w-full rounded-3xl border border-slate-200" />
+                <div ref={mapRef} className="h-64 w-full rounded-3xl border border-slate-200 sm:h-72" />
               ) : (
                 <div className="rounded-3xl bg-amber-50 px-4 py-3 text-sm text-amber-800">Google Maps is disabled until NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is configured in the customer web environment. You can still enter and save the address manually.</div>
               )}
@@ -585,7 +585,7 @@ export function AddressBookManager({
           </label>
 
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="btn-primary" onClick={() => void handleSaveAddress()} disabled={busyKey === 'save-address'}>
+            <button type="button" className="btn-primary min-h-[44px] w-full sm:w-auto" onClick={() => void handleSaveAddress()} disabled={busyKey === 'save-address'}>
               {busyKey === 'save-address' ? 'Saving address...' : editingAddressId ? 'Save address' : 'Add address'}
             </button>
           </div>
@@ -597,28 +597,28 @@ export function AddressBookManager({
           {sortedAddresses.map((address) => {
             const isSelected = selectedAddressId === address.id;
             return (
-              <div key={address.id} className={`rounded-3xl border p-5 ${isSelected ? 'border-brand bg-brand-soft/40' : 'border-slate-200 bg-white'}`}>
+              <div key={address.id} className={`rounded-3xl border p-4 sm:p-5 ${isSelected ? 'border-brand bg-brand-soft/40' : 'border-slate-200 bg-white'}`}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-lg font-bold text-ink">{address.addressType || address.label}</p>
                       {address.isDefault ? <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Default</span> : null}
                       {isSelected ? <span className="rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white">Selected</span> : null}
                     </div>
                     <p className="mt-3 font-semibold text-ink">{address.fullName || address.recipientName}</p>
-                    <p className="mt-1 text-sm text-muted">{formatAddressSummary(address)}</p>
+                    <p className="mt-1 text-sm text-muted break-words">{formatAddressSummary(address)}</p>
                     <p className="mt-1 text-sm text-muted">{address.mobileNumber || address.mobile}</p>
-                    {address.googleMapsLink ? <a href={address.googleMapsLink} target="_blank" rel="noreferrer" className="mt-3 inline-flex text-sm font-semibold text-brand">View on map</a> : null}
+                    {address.googleMapsLink ? <a href={address.googleMapsLink} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-[44px] items-center text-sm font-semibold text-brand">View on map</a> : null}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {onSelectAddress ? <button type="button" className="btn-secondary" onClick={() => onSelectAddress(address.id)}>Select</button> : null}
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    {onSelectAddress ? <button type="button" className="btn-secondary min-h-[44px] w-full sm:w-auto" onClick={() => onSelectAddress(address.id)}>Select</button> : null}
                     {!address.isDefault ? (
-                      <button type="button" className="btn-secondary" onClick={() => void handleSetDefault(address.id)} disabled={busyKey === `default:${address.id}`}>
+                      <button type="button" className="btn-secondary min-h-[44px] w-full sm:w-auto" onClick={() => void handleSetDefault(address.id)} disabled={busyKey === `default:${address.id}`}>
                         {busyKey === `default:${address.id}` ? 'Updating...' : 'Set default'}
                       </button>
                     ) : null}
-                    <button type="button" className="btn-secondary" onClick={() => openEditAddress(address)}>Edit</button>
-                    <button type="button" className="rounded-2xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-50" onClick={() => void handleDeleteAddress(address)} disabled={busyKey === `delete:${address.id}`}>
+                    <button type="button" className="btn-secondary min-h-[44px] w-full sm:w-auto" onClick={() => openEditAddress(address)}>Edit</button>
+                    <button type="button" className="rounded-2xl border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 min-h-[44px] w-full sm:w-auto" onClick={() => void handleDeleteAddress(address)} disabled={busyKey === `delete:${address.id}`}>
                       {busyKey === `delete:${address.id}` ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>

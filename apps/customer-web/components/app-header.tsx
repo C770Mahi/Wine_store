@@ -35,6 +35,7 @@ export function AppHeader() {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
   const searchParamKey = searchParams.toString();
   const isShopPage = pathname === '/shop';
@@ -120,6 +121,7 @@ export function AppHeader() {
 
   useEffect(() => {
     setIsSearchOpen(false);
+    setIsMenuOpen(false);
   }, [pathname, searchParamKey]);
 
   const normalizedSearchQuery = searchQuery.trim().replace(/\s+/g, ' ');
@@ -129,16 +131,16 @@ export function AppHeader() {
     ? null
     : (
         <>
-          <Link href="/auth/login" className="font-semibold text-brand">Login</Link>
-          <Link href="/auth/signup" className="chip">Sign up</Link>
+          <Link href="/auth/login" className="inline-flex min-h-[44px] items-center justify-center rounded-2xl px-4 py-2 font-semibold text-brand transition hover:bg-brand-soft/60">Login</Link>
+          <Link href="/auth/signup" className="chip w-full sm:w-auto">Sign up</Link>
         </>
       );
 
   const profileControls = !authReady || !hasSession
     ? null
     : (
-        <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
-          <Link href="/account" className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm transition hover:border-brand/40 hover:shadow-card sm:max-w-[280px]">
+        <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
+          <Link href="/account" className="flex min-w-0 w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm transition hover:border-brand/40 hover:shadow-card sm:max-w-[280px]">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
               {(userName.trim().charAt(0) || 'U').toUpperCase()}
             </div>
@@ -147,7 +149,7 @@ export function AppHeader() {
               <p className="truncate text-xs text-muted">{userMobile || 'Open account'}</p>
             </div>
           </Link>
-          <button type="button" className="chip shrink-0" onClick={clearSession}>Logout</button>
+          <button type="button" className="chip w-full shrink-0 sm:w-auto" onClick={clearSession}>Logout</button>
         </div>
       );
 
@@ -186,7 +188,7 @@ export function AppHeader() {
 
               {showSearchPanel ? (
                 <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-40 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-card">
-                  <div className="max-h-[28rem] overflow-y-auto p-3 sm:p-4">
+                  <div className="max-h-[60vh] overflow-y-auto p-3 sm:max-h-[28rem] sm:p-4">
                     {isSearchLoading ? (
                       <div className="rounded-2xl bg-slate-50 px-4 py-6 text-center text-sm text-muted">Searching...</div>
                     ) : searchError ? (
@@ -203,7 +205,7 @@ export function AppHeader() {
                               onClick={() => setIsSearchOpen(false)}
                             >
                               <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
-                                <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                                <img src={product.image} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-start justify-between gap-3">
@@ -224,7 +226,7 @@ export function AppHeader() {
                         })}
                         <Link
                           href={`/shop?search=${encodeURIComponent(normalizedSearchQuery)}`}
-                          className="flex items-center justify-center rounded-2xl bg-brand-soft px-4 py-3 text-sm font-semibold text-brand-dark"
+                          className="flex min-h-[44px] items-center justify-center rounded-2xl bg-brand-soft px-4 py-3 text-sm font-semibold text-brand-dark"
                           onClick={() => setIsSearchOpen(false)}
                         >
                           View all results
@@ -237,35 +239,59 @@ export function AppHeader() {
                 </div>
               ) : null}
             </div>
-            <Link href="/cart" className="btn-primary w-full justify-center whitespace-nowrap px-4 sm:w-auto">
-              Cart{cartCount ? ` (${cartCount})` : ''}
-            </Link>
-            {profileControls}
+
+            <div className="flex items-center gap-2 lg:hidden">
+              <Link href="/cart" className="btn-primary min-h-[44px] flex-1 justify-center whitespace-nowrap px-4 sm:flex-none">
+                Cart{cartCount ? ` (${cartCount})` : ''}
+              </Link>
+              <button
+                type="button"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-xl text-ink"
+                aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-expanded={isMenuOpen}
+                onClick={() => setIsMenuOpen((current) => !current)}
+              >
+                {isMenuOpen ? '✕' : '☰'}
+              </button>
+            </div>
+
+            <div className="hidden items-center gap-3 lg:flex">
+              <Link href="/cart" className="btn-primary justify-center whitespace-nowrap px-4">
+                Cart{cartCount ? ` (${cartCount})` : ''}
+              </Link>
+              {profileControls}
+            </div>
           </div>
         </div>
 
-        {isShopPage ? null : (
-          <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <nav className="flex gap-2 overflow-x-auto pb-1 pr-1">
-              {navItems.map((item) => {
-                const isActive = pathname === '/shop' && searchParams.get('category') === item.category;
-                return (
-                  <Link
-                    key={item.label}
-                    href={{ pathname: '/shop' as Route, query: { category: item.category } }}
-                    className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition sm:px-4 sm:text-sm ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600'}`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
+        <div className={`${isMenuOpen || !isShopPage ? 'mt-4' : 'hidden'} ${isMenuOpen ? 'block' : 'hidden'} lg:mt-4 lg:block`}>
+          <div className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-4 lg:flex-row lg:items-center lg:justify-between lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
+            {isShopPage ? null : (
+              <nav className="grid gap-2 sm:grid-cols-2 lg:flex lg:gap-2 lg:overflow-x-auto lg:pb-1 lg:pr-1">
+                {navItems.map((item) => {
+                  const isActive = pathname === '/shop' && searchParams.get('category') === item.category;
+                  return (
+                    <Link
+                      key={item.label}
+                      href={{ pathname: '/shop' as Route, query: { category: item.category } }}
+                      className={`inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-full px-3 py-2 text-center text-xs font-semibold transition sm:px-4 sm:text-sm ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600'}`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+            )}
 
-            <div className="flex min-h-10 flex-wrap items-center gap-2 text-sm sm:gap-3">
+            <div className="flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 lg:hidden">
+              {profileControls ?? authControls}
+            </div>
+
+            <div className="hidden min-h-10 flex-wrap items-center gap-2 text-sm sm:gap-3 lg:flex">
               {authControls}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </header>
   );

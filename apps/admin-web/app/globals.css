@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  @apply overflow-x-hidden;
+}
+
 body {
-  @apply bg-slate-950 text-white;
+  @apply overflow-x-hidden bg-slate-950 text-white;
 }

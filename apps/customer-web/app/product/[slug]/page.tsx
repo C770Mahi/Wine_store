@@ -13,10 +13,10 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
   const relatedProducts = await getRelatedProducts(params.slug);
 
   return (
-    <main className="page-shell pb-16 pt-8">
-      <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
+    <main className="page-shell pb-16 pt-6 sm:pt-8">
+      <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_1fr]">
         <div className="card overflow-hidden">
-          <img src={product.image} alt={product.name} className="min-h-[280px] w-full object-cover sm:min-h-[360px] lg:min-h-[420px]" />
+          <img src={product.image} alt={product.name} className="min-h-[260px] w-full object-cover sm:min-h-[360px] lg:min-h-[420px]" />
         </div>
         <section className="card p-5 sm:p-8">
           <div className="flex flex-wrap gap-2 text-sm font-semibold text-muted">
@@ -27,9 +27,9 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
           <h1 className="mt-5 text-3xl font-black tracking-tight text-ink sm:text-4xl">{product.name}</h1>
           <p className="mt-3 text-base text-muted">{product.description}</p>
 
-          <div className="mt-6 rounded-3xl bg-brand-soft p-5">
+          <div className="mt-6 rounded-3xl bg-brand-soft p-4 sm:p-5">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-dark">Available packs</p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid gap-3 min-[390px]:grid-cols-2">
               {product.variants.map((variant) => (
                 <div key={variant.id} className="rounded-2xl border border-emerald-200 bg-white p-4">
                   <p className="font-bold text-ink">{variant.label}</p>
@@ -41,7 +41,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="mt-6 grid gap-4 min-[390px]:grid-cols-2 sm:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-sm text-muted">Delivery ETA</p>
               <p className="mt-1 font-bold text-ink">{product.eta}</p>
@@ -64,7 +64,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Related products</p>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-ink sm:text-3xl">You may also like</h2>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-5 min-[390px]:grid-cols-2 xl:grid-cols-4">
             {relatedProducts.map((item) => (
               <ProductCard key={item.id} product={item} />
             ))}

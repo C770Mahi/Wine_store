@@ -29,9 +29,9 @@ function CheckoutFailureContent() {
           </div>
         </div>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Link href="/checkout" className="btn-primary w-full justify-center sm:w-auto">Try payment again</Link>
-          <Link href="/cart" className="btn-secondary w-full justify-center sm:w-auto">Return to cart</Link>
-          <Link href="/shop" className="btn-secondary w-full justify-center sm:w-auto">Continue shopping</Link>
+          <Link href="/checkout" className="btn-primary min-h-[44px] w-full justify-center sm:w-auto">Try payment again</Link>
+          <Link href="/cart" className="btn-secondary min-h-[44px] w-full justify-center sm:w-auto">Return to cart</Link>
+          <Link href="/shop" className="btn-secondary min-h-[44px] w-full justify-center sm:w-auto">Continue shopping</Link>
         </div>
       </article>
     </main>

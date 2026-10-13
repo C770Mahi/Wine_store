@@ -249,17 +249,17 @@ export function CheckoutPageClient() {
   };
 
   if (isLoading) {
-    return <div className="card p-8 text-center text-sm text-muted">Loading checkout details...</div>;
+    return <div className="card p-6 text-center text-sm text-muted sm:p-8">Loading checkout details...</div>;
   }
 
   if (!hasSession) {
     return (
-      <article className="card p-8 text-center">
+      <article className="card p-6 text-center sm:p-8">
         <h2 className="text-2xl font-bold text-ink">Please sign in to continue checkout</h2>
         <p className="mt-2 text-sm text-muted">Your address book and orders are tied to your account session.</p>
         <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href="/auth/login" className="btn-primary w-full sm:w-auto">Login</Link>
-          <Link href="/auth/signup" className="btn-secondary w-full sm:w-auto">Create account</Link>
+          <Link href="/auth/login" className="btn-primary min-h-[44px] w-full sm:w-auto">Login</Link>
+          <Link href="/auth/signup" className="btn-secondary min-h-[44px] w-full sm:w-auto">Create account</Link>
         </div>
       </article>
     );
@@ -282,16 +282,16 @@ export function CheckoutPageClient() {
             emptyMessage={`No saved addresses found for ${sessionUser?.name ?? 'this account'} yet. Add one to continue checkout.`}
           />
 
-          <article className="card p-6">
+          <article className="card p-5 sm:p-6">
             <h2 className="text-xl font-bold text-ink">2. Delivery slot</h2>
             <div className="mt-4 flex flex-wrap gap-3">
               {slots.map((slot) => (
-                <button key={slot} type="button" onClick={() => setSelectedSlot(slot)} className={`chip ${selectedSlot === slot ? 'bg-brand text-white border-brand' : ''}`}>{slot}</button>
+                <button key={slot} type="button" onClick={() => setSelectedSlot(slot)} className={`chip min-h-[44px] w-full justify-center min-[390px]:w-auto ${selectedSlot === slot ? 'bg-brand text-white border-brand' : ''}`}>{slot}</button>
               ))}
             </div>
           </article>
 
-          <article className="card p-6">
+          <article className="card p-5 sm:p-6">
             <h2 className="text-xl font-bold text-ink">3. Pay online with Razorpay</h2>
             <p className="mt-2 text-sm text-muted">Payments are collected directly into your Razorpay merchant account and are verified securely on the backend before the order is created.</p>
             <div className="mt-4 flex flex-wrap gap-3">
@@ -305,25 +305,25 @@ export function CheckoutPageClient() {
           </article>
         </section>
 
-        <aside className="card h-fit p-6">
+        <aside className="card h-fit p-5 sm:p-6 lg:sticky lg:top-28">
           <h2 className="text-xl font-bold text-ink">Order summary</h2>
           <div className="mt-5 space-y-3 text-sm text-muted">
             {selectedAddress ? (
               <div className="rounded-2xl bg-slate-50 px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Deliver to</p>
                 <p className="mt-2 font-semibold text-ink">{selectedAddress.fullName || selectedAddress.recipientName}</p>
-                <p className="mt-1">{selectedAddress.formattedAddress}</p>
+                <p className="mt-1 break-words">{selectedAddress.formattedAddress}</p>
               </div>
             ) : null}
-            <div className="flex items-center justify-between"><span>Subtotal</span><span>{formatCurrency(cart.summary.subtotal)}</span></div>
-            <div className="flex items-center justify-between"><span>Discount</span><span>-{formatCurrency(cart.summary.discount)}</span></div>
-            <div className="flex items-center justify-between"><span>Delivery fee</span><span>{formatCurrency(cart.summary.delivery)}</span></div>
-            <div className="flex items-center justify-between"><span>Taxes</span><span>{formatCurrency(cart.summary.tax)}</span></div>
-            <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-base font-bold text-ink"><span>Payable</span><span>{formatCurrency(cart.summary.payable)}</span></div>
+            <div className="flex items-center justify-between gap-4"><span>Subtotal</span><span>{formatCurrency(cart.summary.subtotal)}</span></div>
+            <div className="flex items-center justify-between gap-4"><span>Discount</span><span>-{formatCurrency(cart.summary.discount)}</span></div>
+            <div className="flex items-center justify-between gap-4"><span>Delivery fee</span><span>{formatCurrency(cart.summary.delivery)}</span></div>
+            <div className="flex items-center justify-between gap-4"><span>Taxes</span><span>{formatCurrency(cart.summary.tax)}</span></div>
+            <div className="flex items-center justify-between gap-4 border-t border-slate-200 pt-3 text-base font-bold text-ink"><span>Payable</span><span>{formatCurrency(cart.summary.payable)}</span></div>
           </div>
           {message ? <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{message}</div> : null}
           {error ? <div className="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
-          <button className="btn-primary mt-6 w-full" onClick={handlePlaceOrder} disabled={placingOrder || !cart.items.length || !selectedAddressId}>{placingOrder ? 'Opening Razorpay...' : 'Pay securely with Razorpay'}</button>
+          <button className="btn-primary mt-6 min-h-[44px] w-full" onClick={handlePlaceOrder} disabled={placingOrder || !cart.items.length || !selectedAddressId}>{placingOrder ? 'Opening Razorpay...' : 'Pay securely with Razorpay'}</button>
           {!isRazorpayReady ? <p className="mt-3 text-xs text-muted">Preparing secure payment options...</p> : null}
         </aside>
       </div>

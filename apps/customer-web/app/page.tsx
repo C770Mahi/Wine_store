@@ -79,9 +79,9 @@ export default async function HomePage() {
         </div>
 
         {mobileQuickCategories.length ? (
-          <div className="mt-5 grid grid-cols-5 gap-3">
+          <div className="mt-5 grid grid-cols-3 gap-3 min-[390px]:grid-cols-4 min-[480px]:grid-cols-5">
             {mobileQuickCategories.map((section) => (
-              <Link key={section.category} href={`/shop?category=${encodeURIComponent(section.category)}`} className="flex flex-col items-center gap-2 rounded-3xl bg-white/80 px-2 py-3 text-center shadow-sm ring-1 ring-slate-100 backdrop-blur">
+              <Link key={section.category} href={`/shop?category=${encodeURIComponent(section.category)}`} className="flex min-h-[108px] flex-col items-center gap-2 rounded-3xl bg-white/80 px-2 py-3 text-center shadow-sm ring-1 ring-slate-100 backdrop-blur">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-soft text-lg">{categoryIcons[section.category] ?? '🛒'}</div>
                 <span className="line-clamp-2 text-[11px] font-semibold leading-4 text-slate-700">{section.category}</span>
               </Link>

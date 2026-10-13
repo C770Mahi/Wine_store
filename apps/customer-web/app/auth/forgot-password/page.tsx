@@ -48,22 +48,22 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="page-shell flex min-h-[70vh] items-center justify-center py-10 sm:py-16">
+    <main className="page-shell flex min-h-[70vh] items-center justify-center py-8 sm:py-16">
       <div className="card w-full max-w-xl p-5 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Forgot password</p>
         <h1 className="mt-2 text-2xl font-black tracking-tight text-ink sm:text-3xl">Reset using mobile OTP or email</h1>
 
         <form className="mt-6 space-y-4" onSubmit={handleSend}>
-          <input className="w-full rounded-2xl border border-slate-200 px-4 py-3" placeholder="Enter mobile or email" value={identifier} onChange={(event) => setIdentifier(event.target.value)} />
-          <button className="btn-primary w-full" disabled={loading || phase !== 'request'}>{loading && phase === 'request' ? 'Please wait...' : 'Send reset OTP'}</button>
+          <input className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base" placeholder="Enter mobile or email" value={identifier} onChange={(event) => setIdentifier(event.target.value)} />
+          <button className="btn-primary min-h-[44px] w-full" disabled={loading || phase !== 'request'}>{loading && phase === 'request' ? 'Please wait...' : 'Send reset OTP'}</button>
         </form>
 
         {phase !== 'request' ? (
           <div className="mt-6 space-y-4 rounded-3xl border border-slate-200 p-5">
-            <input className="w-full rounded-2xl border border-slate-200 px-4 py-3" placeholder="Enter OTP" value={code} onChange={(event) => setCode(event.target.value)} />
-            <input className="w-full rounded-2xl border border-slate-200 px-4 py-3" type="password" placeholder="New password" value={password} onChange={(event) => setPassword(event.target.value)} />
+            <input className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base" placeholder="Enter OTP" value={code} onChange={(event) => setCode(event.target.value)} />
+            <input className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base" type="password" placeholder="New password" value={password} onChange={(event) => setPassword(event.target.value)} />
             {previewCode ? <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">OTP preview fallback: <strong>{previewCode}</strong></div> : null}
-            <button type="button" className="btn-primary w-full" onClick={handleReset} disabled={loading || phase === 'done'}>{phase === 'done' ? 'Password updated' : 'Reset password'}</button>
+            <button type="button" className="btn-primary min-h-[44px] w-full" onClick={handleReset} disabled={loading || phase === 'done'}>{phase === 'done' ? 'Password updated' : 'Reset password'}</button>
           </div>
         ) : null}
 

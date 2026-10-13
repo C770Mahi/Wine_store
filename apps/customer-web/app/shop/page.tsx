@@ -44,18 +44,18 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const products = sortProducts(productsResponse, sort);
 
   return (
-    <main className="page-shell pb-16 pt-8">
-      <div className="mb-8 flex flex-col gap-3">
+    <main className="page-shell pb-16 pt-6 sm:pt-8">
+      <div className="mb-6 flex flex-col gap-3 sm:mb-8">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Product listing</p>
         <h1 className="text-3xl font-black tracking-tight text-ink sm:text-4xl">Browse Near Kart collections</h1>
         <p className="max-w-3xl text-sm text-muted">API-backed listing page with category search and fast neighbourhood shopping.</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-        <aside className="card h-fit p-5">
+        <aside className="card h-fit p-4 sm:p-5 lg:sticky lg:top-28">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Categories</p>
-          <div className="mt-4 flex flex-col gap-2">
-            <Link href="/shop" className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${activeCategory ? 'border border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand' : 'border border-brand bg-brand text-white shadow-sm'}`}>
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
+            <Link href="/shop" className={`inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-semibold transition ${activeCategory ? 'border border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand' : 'border border-brand bg-brand text-white shadow-sm'}`}>
               All categories
             </Link>
             {categories.map((category) => {
@@ -64,7 +64,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 <Link
                   key={category}
                   href={`/shop?category=${encodeURIComponent(category)}`}
-                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand'}`}
+                  className={`inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-semibold transition ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand'}`}
                 >
                   {category}
                 </Link>
@@ -83,7 +83,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               <ShopSortControl value={sort} />
             </Suspense>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-5 min-[390px]:grid-cols-2 xl:grid-cols-3">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

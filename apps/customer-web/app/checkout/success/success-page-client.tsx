@@ -79,7 +79,7 @@ export function CheckoutSuccessClient() {
       {!isLoading && order ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
           <section className="space-y-6">
-            <article className="card p-6 sm:p-8">
+            <article className="card p-5 sm:p-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Order confirmed</p>
@@ -92,7 +92,7 @@ export function CheckoutSuccessClient() {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-6 grid gap-4 min-[390px]:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-3xl bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Order total</p>
                   <p className="mt-2 font-semibold text-ink">{formatCurrency(order.grandTotal)}</p>
@@ -112,7 +112,7 @@ export function CheckoutSuccessClient() {
               </div>
             </article>
 
-            <article className="card p-6 sm:p-8">
+            <article className="card p-5 sm:p-8">
               <h2 className="text-2xl font-black tracking-tight text-ink">Delivery address</h2>
               <div className="mt-4 rounded-3xl bg-slate-50 p-5 text-sm text-muted">
                 <p className="font-semibold text-ink">{order.deliveryAddress.recipientName}</p>
