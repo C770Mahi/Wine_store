@@ -73,6 +73,16 @@ export interface OfferBanner {
   couponCode?: string;
 }
 
+export interface CustomerOrder {
+  id: string;
+  userId: string;
+  orderNumber: string;
+  status: string;
+  paymentStatus: string;
+  grandTotal: number;
+  deliveryEta: string;
+}
+
 export const offerBanners: OfferBanner[] = [
   { id: 'offer-1', title: 'Flat ₹100 off', subtitle: 'Use WELCOME100 on orders above ₹499', couponCode: 'WELCOME100' },
   { id: 'offer-2', title: 'Fresh basket savings', subtitle: 'Save 20% on selected fruits, vegetables, and daily essentials', couponCode: 'FRESH20' },
@@ -157,6 +167,10 @@ export async function getCart() {
 
 export async function getAddresses() {
   return safeFetch(() => apiFetch<Address[]>('/location/addresses'), []);
+}
+
+export async function getOrders() {
+  return safeFetch(() => apiFetch<CustomerOrder[]>('/orders'), []);
 }
 
 export async function createOrderRequest(payload: { addressId: string; slot?: string; paymentMethod?: string; ageConfirmed: boolean }) {

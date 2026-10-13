@@ -26,6 +26,7 @@ export function AppHeader() {
   const searchParams = useSearchParams();
   const [cartCount, setCartCount] = useState(0);
   const [userName, setUserName] = useState('');
+  const [userMobile, setUserMobile] = useState('');
   const [hasSession, setHasSession] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const isShopPage = pathname === '/shop';
@@ -35,6 +36,7 @@ export function AppHeader() {
       const storedUser = getStoredUser();
       setHasSession(hasStoredSession());
       setUserName(storedUser?.name ?? '');
+      setUserMobile(storedUser?.mobile ?? '');
       setAuthReady(true);
 
       try {
@@ -55,21 +57,31 @@ export function AppHeader() {
     };
   }, []);
 
-  const authControls = !authReady
+  const authControls = !authReady || hasSession
     ? null
-    : hasSession
-      ? (
-          <>
-            {userName ? <span className="max-w-[180px] truncate font-semibold text-ink">Hi, {userName}</span> : null}
-            <button type="button" className="chip" onClick={clearSession}>Logout</button>
-          </>
-        )
-      : (
-          <>
-            <Link href="/auth/login" className="font-semibold text-brand">Login</Link>
-            <Link href="/auth/signup" className="chip">Sign up</Link>
-          </>
-        );
+    : (
+        <>
+          <Link href="/auth/login" className="font-semibold text-brand">Login</Link>
+          <Link href="/auth/signup" className="chip">Sign up</Link>
+        </>
+      );
+
+  const profileControls = !authReady || !hasSession
+    ? null
+    : (
+        <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
+          <Link href="/account" className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm transition hover:border-brand/40 hover:shadow-card sm:max-w-[280px]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
+              {(userName.trim().charAt(0) || 'U').toUpperCase()}
+            </div>
+            <div className="min-w-0 text-left">
+              <p className="truncate text-sm font-semibold text-ink">{userName || 'Customer profile'}</p>
+              <p className="truncate text-xs text-muted">{userMobile || 'Open account'}</p>
+            </div>
+          </Link>
+          <button type="button" className="chip shrink-0" onClick={clearSession}>Logout</button>
+        </div>
+      );
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -88,7 +100,7 @@ export function AppHeader() {
             </div>
           </div>
 
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:max-w-2xl">
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:max-w-3xl lg:justify-end">
             <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 sm:px-4 sm:py-3">
               <span className="text-slate-400">🔎</span>
               <input className="w-full bg-transparent text-sm outline-none" placeholder="Search products, categories, offers" />
@@ -96,6 +108,7 @@ export function AppHeader() {
             <Link href="/cart" className="btn-primary w-full justify-center whitespace-nowrap px-4 sm:w-auto">
               Cart{cartCount ? ` (${cartCount})` : ''}
             </Link>
+            {profileControls}
           </div>
         </div>
 
