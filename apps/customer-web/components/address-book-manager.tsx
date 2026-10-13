@@ -86,8 +86,8 @@ function createEmptyAddressForm(profileName?: string, profileMobile?: string): A
     state: '',
     pincode: '',
     country: 'India',
-    latitude: Number.NaN,
-    longitude: Number.NaN,
+    latitude: null,
+    longitude: null,
     formattedAddress: '',
     isDefault: false
   };
@@ -119,8 +119,8 @@ function toAddressForm(address: Address): AddressFormState {
     state: address.state,
     pincode: address.pincode,
     country: address.country,
-    latitude: address.latitude ?? Number.NaN,
-    longitude: address.longitude ?? Number.NaN,
+    latitude: address.latitude ?? null,
+    longitude: address.longitude ?? null,
     formattedAddress: address.formattedAddress,
     isDefault: address.isDefault
   };
@@ -397,11 +397,6 @@ export function AddressBookManager({
       setError('Complete the address fields and enter a valid 6-digit pincode.');
       return;
     }
-    if (!Number.isFinite(form.latitude) || !Number.isFinite(form.longitude)) {
-      setError('Choose a valid map location before saving this address.');
-      return;
-    }
-
     setBusyKey('save-address');
     setError('');
     setNotice('');
@@ -409,6 +404,8 @@ export function AddressBookManager({
     try {
       const payload: AddressPayload = {
         ...form,
+        latitude: Number.isFinite(form.latitude) ? form.latitude : null,
+        longitude: Number.isFinite(form.longitude) ? form.longitude : null,
         formattedAddress: form.formattedAddress?.trim() || buildFormattedAddress(form)
       };
       const savedAddress = editingAddressId
@@ -530,7 +527,7 @@ export function AddressBookManager({
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="font-semibold text-ink">Google Maps location</p>
-                <p className="text-sm text-muted">Search, drag the pin, or use your current location to auto-fill the address.</p>
+                <p className="text-sm text-muted">Search, drag the pin, or use your current location to auto-fill the address. You can also enter the address manually and save without a map pin.</p>
               </div>
               <div className="flex flex-wrap gap-3">
                 <button type="button" className="btn-secondary" onClick={handleUseCurrentLocation} disabled={busyKey === 'current-location'}>
@@ -550,14 +547,14 @@ export function AddressBookManager({
                 disabled={!GOOGLE_MAPS_API_KEY}
               />
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 text-sm text-muted">
-                <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Latitude</span><div className="mt-2 font-semibold text-ink">{Number.isFinite(form.latitude) ? form.latitude.toFixed(6) : 'Not set'}</div></div>
-                <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Longitude</span><div className="mt-2 font-semibold text-ink">{Number.isFinite(form.longitude) ? form.longitude.toFixed(6) : 'Not set'}</div></div>
-                <div className="rounded-2xl bg-slate-50 px-4 py-3 sm:col-span-2"><span className="text-xs uppercase tracking-[0.18em] text-brand">Detected address</span><div className="mt-2 font-semibold text-ink">{form.formattedAddress || 'Pick a location on the map to auto-fill this address.'}</div></div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Latitude</span><div className="mt-2 font-semibold text-ink">{Number.isFinite(form.latitude) ? form.latitude.toFixed(6) : 'Optional'}</div></div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3"><span className="text-xs uppercase tracking-[0.18em] text-brand">Longitude</span><div className="mt-2 font-semibold text-ink">{Number.isFinite(form.longitude) ? form.longitude.toFixed(6) : 'Optional'}</div></div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 sm:col-span-2"><span className="text-xs uppercase tracking-[0.18em] text-brand">Detected address</span><div className="mt-2 font-semibold text-ink">{form.formattedAddress || 'Pick a location on the map to auto-fill this address, or enter it manually below.'}</div></div>
               </div>
               {GOOGLE_MAPS_API_KEY ? (
                 <div ref={mapRef} className="h-72 w-full rounded-3xl border border-slate-200" />
               ) : (
-                <div className="rounded-3xl bg-amber-50 px-4 py-3 text-sm text-amber-800">Google Maps is disabled until NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is configured in the customer web environment.</div>
+                <div className="rounded-3xl bg-amber-50 px-4 py-3 text-sm text-amber-800">Google Maps is disabled until NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is configured in the customer web environment. You can still enter and save the address manually.</div>
               )}
               {mapError ? <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{mapError}</div> : null}
             </div>

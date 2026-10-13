@@ -114,8 +114,8 @@ export interface AddressPayload {
   state: string;
   pincode: string;
   country: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number | null;
+  longitude?: number | null;
   formattedAddress?: string;
   isDefault?: boolean;
 }

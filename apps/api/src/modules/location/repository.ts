@@ -14,8 +14,8 @@ export interface AddressInput {
   state: string;
   pincode: string;
   country: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number | null;
+  longitude?: number | null;
   formattedAddress?: string;
   isDefault?: boolean;
 }
@@ -42,8 +42,8 @@ type AddressRow = {
   google_map_link: string | null;
 };
 
-function buildGoogleMapsLink(latitude: number, longitude: number) {
-  return `https://www.google.com/maps?q=${latitude},${longitude}`;
+function buildGoogleMapsLink(latitude?: number | null, longitude?: number | null) {
+  return latitude != null && longitude != null ? `https://www.google.com/maps?q=${latitude},${longitude}` : null;
 }
 
 function buildFormattedAddress(address: {
@@ -149,7 +149,9 @@ export async function listAddresses(userId = DEMO_USER_ID) {
 export async function createAddress(address: AddressInput, userId = DEMO_USER_ID) {
   const id = uuid();
   const formattedAddress = address.formattedAddress?.trim() || buildFormattedAddress(address);
-  const googleMapLink = buildGoogleMapsLink(address.latitude, address.longitude);
+  const latitude = address.latitude ?? null;
+  const longitude = address.longitude ?? null;
+  const googleMapLink = buildGoogleMapsLink(latitude, longitude);
   const lineOne = buildPrimaryAddressLine(address);
 
   await dbTransaction(async (client) => {
@@ -179,8 +181,8 @@ export async function createAddress(address: AddressInput, userId = DEMO_USER_ID
         address.state,
         address.country,
         address.pincode,
-        address.latitude,
-        address.longitude,
+        latitude,
+        longitude,
         shouldBeDefault,
         address.houseNo,
         address.apartmentName || null,
@@ -206,7 +208,9 @@ export async function updateAddress(id: string, address: AddressInput, userId = 
   }
 
   const formattedAddress = address.formattedAddress?.trim() || buildFormattedAddress(address);
-  const googleMapLink = buildGoogleMapsLink(address.latitude, address.longitude);
+  const latitude = address.latitude ?? null;
+  const longitude = address.longitude ?? null;
+  const googleMapLink = buildGoogleMapsLink(latitude, longitude);
   const lineOne = buildPrimaryAddressLine(address);
   const shouldBeDefault = address.isDefault === true || existing.is_default;
 
@@ -248,8 +252,8 @@ export async function updateAddress(id: string, address: AddressInput, userId = 
         address.state,
         address.country,
         address.pincode,
-        address.latitude,
-        address.longitude,
+        latitude,
+        longitude,
         shouldBeDefault,
         address.houseNo,
         address.apartmentName || null,
