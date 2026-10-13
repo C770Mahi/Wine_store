@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1';
-const orderStatuses = ['created', 'confirmed', 'packed', 'assigned', 'picked_up', 'delivered', 'cancelled'];
+const orderStatuses = ['created', 'confirmed', 'packed', 'out_for_delivery', 'assigned', 'picked_up', 'delivered', 'cancelled'];
 
 type AdminPageMode = 'overview' | 'customers' | 'orders' | 'products' | 'product-add' | 'categories';
 
@@ -26,6 +26,13 @@ type OrderRow = {
   created_at: string;
   customer_name: string;
   customer_mobile: string;
+  delivery_contact_name: string;
+  delivery_mobile: string;
+  delivery_address: string;
+  delivery_latitude: number | string | null;
+  delivery_longitude: number | string | null;
+  google_map_link: string | null;
+  transaction_id: string | null;
 };
 
 type CustomerRow = {
@@ -911,7 +918,7 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold">Order monitor</h2>
-          <p className="mt-1 text-sm text-slate-300">Track order history and update delivery status from one table.</p>
+          <p className="mt-1 text-sm text-slate-300">Track orders, payment status, transaction IDs, customer details, and delivery addresses from one table.</p>
         </div>
         <button type="button" className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-semibold" onClick={() => void load()}>
           Refresh
@@ -923,6 +930,7 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
             <tr>
               <th className="pb-3 pr-4">Order</th>
               <th className="pb-3 pr-4">Customer</th>
+              <th className="pb-3 pr-4">Delivery address</th>
               <th className="pb-3 pr-4">Total</th>
               <th className="pb-3 pr-4">Payment</th>
               <th className="pb-3 pr-4">Placed</th>
@@ -932,13 +940,32 @@ export function AdminConsole({ mode }: { mode: AdminPageMode }) {
           <tbody>
             {orders.map((order) => (
               <tr key={order.id} className="border-t border-white/10 align-top">
-                <td className="py-3 pr-4 font-semibold text-white">{order.order_number}</td>
                 <td className="py-3 pr-4 text-slate-300">
-                  <div>{order.customer_name}</div>
+                  <div className="font-semibold text-white">{order.order_number}</div>
+                  <div className="mt-1 text-xs text-slate-500">Transaction ID: {order.transaction_id ?? 'Pending'}</div>
+                </td>
+                <td className="py-3 pr-4 text-slate-300">
+                  <div className="font-semibold text-white">{order.customer_name}</div>
                   <div className="text-xs text-slate-500">{order.customer_mobile}</div>
                 </td>
+                <td className="py-3 pr-4 text-slate-300">
+                  <div className="font-semibold text-white">{order.delivery_contact_name}</div>
+                  <div className="text-xs text-slate-500">{order.delivery_mobile}</div>
+                  <div className="mt-2 text-xs text-slate-400">{order.delivery_address}</div>
+                  {order.delivery_latitude != null && order.delivery_longitude != null ? (
+                    <div className="mt-2 text-xs text-slate-500">{Number(order.delivery_latitude).toFixed(6)}, {Number(order.delivery_longitude).toFixed(6)}</div>
+                  ) : null}
+                  {order.google_map_link ? (
+                    <a href={order.google_map_link} target="_blank" rel="noreferrer" className="mt-2 inline-flex rounded-xl border border-emerald-400/30 px-3 py-2 text-xs font-semibold text-emerald-100">
+                      View on Map
+                    </a>
+                  ) : null}
+                </td>
                 <td className="py-3 pr-4 text-slate-300">{formatCurrency(Number(order.grand_total))}</td>
-                <td className="py-3 pr-4 text-slate-300">{order.payment_status}</td>
+                <td className="py-3 pr-4 text-slate-300">
+                  <div className="font-semibold text-white">{order.payment_status}</div>
+                  <div className="mt-1 text-xs text-slate-500">Transaction ID: {order.transaction_id ?? 'Pending'}</div>
+                </td>
                 <td className="py-3 pr-4 text-slate-300">{formatDate(order.created_at)}</td>
                 <td className="py-3">
                   <select

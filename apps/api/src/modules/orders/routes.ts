@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { asyncHandler } from '../../lib/async-handler';
 import { getRequestUserId, requireApprovedCustomer, requireCustomerAuth } from '../../middleware/auth';
 import { getCart } from '../cart/repository';
-import { createOrder, getOrderById, getTracking, listOrders } from './repository';
+import { getOrderById, getTracking, listOrders } from './repository';
 
 const router = Router();
 
@@ -13,21 +13,16 @@ router.post('/checkout/validate', requireApprovedCustomer, asyncHandler(async (r
 }));
 
 router.post('/checkout/create-order', requireApprovedCustomer, asyncHandler(async (request, response) => {
-  const payload = z.object({
+  z.object({
     addressId: z.string(),
     slot: z.string().optional(),
     paymentMethod: z.string().optional(),
     ageConfirmed: z.boolean().default(false)
   }).parse(request.body);
 
-  const order = await createOrder({
-    userId: getRequestUserId(request)!,
-    addressId: payload.addressId,
-    slot: payload.slot,
-    paymentMethod: payload.paymentMethod,
-    ageConfirmed: payload.ageConfirmed
+  response.status(400).json({
+    message: 'Order creation now happens only after Razorpay payment verification. Use the Razorpay checkout flow from the customer app.'
   });
-  response.status(201).json({ orderId: order.id, orderNumber: order.orderNumber, status: order.status, paymentStatus: order.paymentStatus });
 }));
 
 router.post('/checkout/select-slot', requireApprovedCustomer, asyncHandler(async (request, response) => {

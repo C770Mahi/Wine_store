@@ -63,15 +63,20 @@ CREATE TABLE addresses (
     label VARCHAR(60) NOT NULL,
     recipient_name VARCHAR(120) NOT NULL,
     mobile VARCHAR(20) NOT NULL,
+    house_no TEXT,
+    apartment_name TEXT,
+    street_area TEXT,
     address_line_1 TEXT NOT NULL,
     address_line_2 TEXT,
     landmark TEXT,
+    formatted_address TEXT,
     city VARCHAR(80) NOT NULL,
     state VARCHAR(80) NOT NULL,
     country VARCHAR(80) NOT NULL DEFAULT 'India',
     pincode VARCHAR(12) NOT NULL,
     latitude NUMERIC(10, 7),
     longitude NUMERIC(10, 7),
+    google_map_link TEXT,
     is_default BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -212,6 +217,29 @@ CREATE TABLE coupons (
 ALTER TABLE carts
     ADD CONSTRAINT carts_coupon_code_fkey FOREIGN KEY (coupon_code) REFERENCES coupons(code);
 
+CREATE TABLE checkout_sessions (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    cart_id UUID NOT NULL REFERENCES carts(id),
+    address_id UUID NOT NULL REFERENCES addresses(id),
+    slot VARCHAR(80),
+    payment_method VARCHAR(40) NOT NULL DEFAULT 'Razorpay',
+    age_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    amount NUMERIC(10, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'INR',
+    snapshot JSONB NOT NULL,
+    razorpay_order_id VARCHAR(120) UNIQUE NOT NULL,
+    razorpay_payment_id VARCHAR(120) UNIQUE,
+    razorpay_signature VARCHAR(255),
+    status VARCHAR(30) NOT NULL DEFAULT 'created',
+    failure_reason TEXT,
+    metadata JSONB,
+    created_order_id UUID,
+    verified_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE orders (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id),
@@ -220,12 +248,21 @@ CREATE TABLE orders (
     order_number VARCHAR(40) UNIQUE NOT NULL,
     status VARCHAR(30) NOT NULL,
     payment_status VARCHAR(30) NOT NULL,
+    payment_method VARCHAR(40),
+    razorpay_order_id VARCHAR(120) UNIQUE,
+    razorpay_payment_id VARCHAR(120) UNIQUE,
     subtotal NUMERIC(10, 2) NOT NULL,
     discount_total NUMERIC(10, 2) NOT NULL DEFAULT 0,
     tax_total NUMERIC(10, 2) NOT NULL DEFAULT 0,
     delivery_fee NUMERIC(10, 2) NOT NULL DEFAULT 0,
     grand_total NUMERIC(10, 2) NOT NULL,
     special_instructions TEXT,
+    delivery_contact_name VARCHAR(120),
+    delivery_mobile VARCHAR(20),
+    delivery_address TEXT,
+    delivery_latitude NUMERIC(10, 7),
+    delivery_longitude NUMERIC(10, 7),
+    google_map_link TEXT,
     delivery_slot_start TIMESTAMP,
     delivery_slot_end TIMESTAMP,
     age_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
@@ -233,6 +270,9 @@ CREATE TABLE orders (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE checkout_sessions
+    ADD CONSTRAINT checkout_sessions_created_order_id_fkey FOREIGN KEY (created_order_id) REFERENCES orders(id);
 
 CREATE TABLE order_items (
     id UUID PRIMARY KEY,
@@ -252,14 +292,19 @@ CREATE TABLE payments (
     provider VARCHAR(40) NOT NULL,
     provider_payment_id VARCHAR(120),
     provider_order_id VARCHAR(120),
+    provider_signature VARCHAR(255),
     method VARCHAR(40) NOT NULL,
     status VARCHAR(30) NOT NULL,
     amount NUMERIC(10, 2) NOT NULL,
     currency VARCHAR(10) NOT NULL DEFAULT 'INR',
+    metadata JSONB,
     failure_reason TEXT,
     paid_at TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX payments_provider_payment_id_key ON payments(provider_payment_id) WHERE provider_payment_id IS NOT NULL;
 
 CREATE TABLE delivery_partners (
     id UUID PRIMARY KEY,

@@ -20,6 +20,7 @@ export const env = {
   googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
   razorpayKeyId: process.env.RAZORPAY_KEY_ID ?? '',
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET ?? '',
+  razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET ?? '',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? '',
   otpProviderName: process.env.OTP_PROVIDER_NAME ?? '',
   otpProviderApiKey: process.env.OTP_PROVIDER_API_KEY ?? '',

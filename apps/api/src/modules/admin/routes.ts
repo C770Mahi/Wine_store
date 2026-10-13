@@ -100,9 +100,24 @@ router.get('/dashboard', asyncHandler(async (_request, response) => {
 router.get('/orders', asyncHandler(async (_request, response) => {
   const { rows } = await dbQuery(
     `SELECT o.id, o.order_number, o.status, o.payment_status, o.grand_total, o.created_at,
-            u.name AS customer_name, u.mobile AS customer_mobile
+            u.name AS customer_name, u.mobile AS customer_mobile,
+            COALESCE(o.delivery_contact_name, a.recipient_name) AS delivery_contact_name,
+            COALESCE(o.delivery_mobile, a.mobile) AS delivery_mobile,
+            COALESCE(o.delivery_address, CONCAT_WS(', ', a.address_line_1, a.address_line_2, a.landmark, a.city, a.state, a.pincode)) AS delivery_address,
+            COALESCE(o.delivery_latitude, a.latitude) AS delivery_latitude,
+            COALESCE(o.delivery_longitude, a.longitude) AS delivery_longitude,
+            COALESCE(o.google_map_link, a.google_map_link) AS google_map_link,
+            p.provider_payment_id AS transaction_id
      FROM orders o
      INNER JOIN users u ON u.id = o.user_id
+     INNER JOIN addresses a ON a.id = o.address_id
+     LEFT JOIN LATERAL (
+       SELECT provider_payment_id
+       FROM payments
+       WHERE order_id = o.id
+       ORDER BY created_at DESC
+       LIMIT 1
+     ) p ON TRUE
      ORDER BY o.created_at DESC
      LIMIT 100`
   );

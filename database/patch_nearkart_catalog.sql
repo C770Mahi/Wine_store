@@ -1,5 +1,50 @@
 BEGIN;
 
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS house_no TEXT;
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS apartment_name TEXT;
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS street_area TEXT;
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS formatted_address TEXT;
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS google_map_link TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(40);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(120);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS razorpay_payment_id VARCHAR(120);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_contact_name VARCHAR(120);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_mobile VARCHAR(20);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_address TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_latitude NUMERIC(10, 7);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_longitude NUMERIC(10, 7);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS google_map_link TEXT;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS provider_signature VARCHAR(255);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS metadata JSONB;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
+
+CREATE TABLE IF NOT EXISTS checkout_sessions (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id),
+  cart_id UUID NOT NULL REFERENCES carts(id),
+  address_id UUID NOT NULL REFERENCES addresses(id),
+  slot VARCHAR(80),
+  payment_method VARCHAR(40) NOT NULL DEFAULT 'Razorpay',
+  age_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+  amount NUMERIC(10, 2) NOT NULL,
+  currency VARCHAR(10) NOT NULL DEFAULT 'INR',
+  snapshot JSONB NOT NULL,
+  razorpay_order_id VARCHAR(120) UNIQUE NOT NULL,
+  razorpay_payment_id VARCHAR(120) UNIQUE,
+  razorpay_signature VARCHAR(255),
+  status VARCHAR(30) NOT NULL DEFAULT 'created',
+  failure_reason TEXT,
+  metadata JSONB,
+  created_order_id UUID REFERENCES orders(id),
+  verified_at TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS payments_provider_payment_id_key ON payments(provider_payment_id) WHERE provider_payment_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS orders_razorpay_order_id_key ON orders(razorpay_order_id) WHERE razorpay_order_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS orders_razorpay_payment_id_key ON orders(razorpay_payment_id) WHERE razorpay_payment_id IS NOT NULL;
+
 INSERT INTO delivery_partners (id, name, mobile, email, vehicle_type, license_number, is_active)
 VALUES ('22222222-2222-2222-2222-222222222222', 'Arjun Rider', '9000000001', 'partner@nearkart.in', 'Bike', 'DL-NEARKART-001', TRUE)
 ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, license_number = EXCLUDED.license_number, is_active = EXCLUDED.is_active;
@@ -119,8 +164,16 @@ VALUES
 ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee3', 'dddddddd-dddd-dddd-dddd-ddddddddddd1', '99999999-9999-9999-9999-999999999910', 1, 68)
 ON CONFLICT (id) DO UPDATE SET cart_id = EXCLUDED.cart_id, variant_id = EXCLUDED.variant_id, quantity = EXCLUDED.quantity, unit_price = EXCLUDED.unit_price;
 
+UPDATE addresses
+SET house_no = '12A', apartment_name = 'Sunrise Residency', street_area = '100 Feet Road, Indiranagar', landmark = 'Near Metro Station', formatted_address = '12A, Sunrise Residency, 100 Feet Road, Indiranagar, Near Metro Station, Bangalore, Karnataka, 560038, India', google_map_link = 'https://www.google.com/maps?q=12.9719,77.6408', updated_at = NOW()
+WHERE id = 'cccccccc-cccc-cccc-cccc-ccccccccccc1';
+
+UPDATE addresses
+SET house_no = '8th Floor', apartment_name = 'Tech Park Tower B', street_area = 'Outer Ring Road, HSR Layout', landmark = 'Opposite Service Road', formatted_address = '8th Floor, Tech Park Tower B, Outer Ring Road, HSR Layout, Opposite Service Road, Bangalore, Karnataka, 560102, India', google_map_link = 'https://www.google.com/maps?q=12.9116,77.6474', updated_at = NOW()
+WHERE id = 'cccccccc-cccc-cccc-cccc-ccccccccccc2';
+
 UPDATE orders
-SET order_number = 'NK10001', subtotal = 522, discount_total = 100, tax_total = 73, delivery_fee = 0, grand_total = 495, age_confirmed = FALSE, updated_at = NOW()
+SET order_number = 'NK10001', subtotal = 522, discount_total = 100, tax_total = 73, delivery_fee = 0, grand_total = 495, delivery_contact_name = 'Demo User', delivery_mobile = '9876543210', delivery_address = '12A, Sunrise Residency, 100 Feet Road, Indiranagar, Near Metro Station, Bangalore, Karnataka, 560038, India', delivery_latitude = 12.9719, delivery_longitude = 77.6408, google_map_link = 'https://www.google.com/maps?q=12.9719,77.6408', age_confirmed = FALSE, updated_at = NOW()
 WHERE id = 'ffffffff-ffff-ffff-ffff-fffffffffff1';
 
 INSERT INTO order_items (id, order_id, variant_id, product_name, variant_name, quantity, unit_price, tax_amount, line_total)

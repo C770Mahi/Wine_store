@@ -107,10 +107,10 @@ VALUES
 ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3', 'FREEDEL', 'flat', 39, 299, 39, 5000, 5, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO addresses (id, user_id, label, recipient_name, mobile, address_line_1, city, state, country, pincode, latitude, longitude, is_default)
+INSERT INTO addresses (id, user_id, label, recipient_name, mobile, house_no, apartment_name, street_area, address_line_1, address_line_2, landmark, formatted_address, city, state, country, pincode, latitude, longitude, google_map_link, is_default)
 VALUES
-('cccccccc-cccc-cccc-cccc-ccccccccccc1', '11111111-1111-1111-1111-111111111111', 'Home', 'Demo User', '9876543210', '100 Feet Road, Indiranagar', 'Bangalore', 'Karnataka', 'India', '560038', 12.9719, 77.6408, TRUE),
-('cccccccc-cccc-cccc-cccc-ccccccccccc2', '11111111-1111-1111-1111-111111111111', 'Office', 'Demo User', '9876543210', 'Outer Ring Road, HSR Layout', 'Bangalore', 'Karnataka', 'India', '560102', 12.9116, 77.6474, FALSE)
+('cccccccc-cccc-cccc-cccc-ccccccccccc1', '11111111-1111-1111-1111-111111111111', 'Home', 'Demo User', '9876543210', '12A', 'Sunrise Residency', '100 Feet Road, Indiranagar', '12A, Sunrise Residency, 100 Feet Road, Indiranagar', 'Sunrise Residency', 'Near Metro Station', '12A, Sunrise Residency, 100 Feet Road, Indiranagar, Near Metro Station, Bangalore, Karnataka, 560038, India', 'Bangalore', 'Karnataka', 'India', '560038', 12.9719, 77.6408, 'https://www.google.com/maps?q=12.9719,77.6408', TRUE),
+('cccccccc-cccc-cccc-cccc-ccccccccccc2', '11111111-1111-1111-1111-111111111111', 'Work', 'Demo User', '9876543210', '8th Floor', 'Tech Park Tower B', 'Outer Ring Road, HSR Layout', '8th Floor, Tech Park Tower B, Outer Ring Road, HSR Layout', 'Tech Park Tower B', 'Opposite Service Road', '8th Floor, Tech Park Tower B, Outer Ring Road, HSR Layout, Opposite Service Road, Bangalore, Karnataka, 560102, India', 'Bangalore', 'Karnataka', 'India', '560102', 12.9116, 77.6474, 'https://www.google.com/maps?q=12.9116,77.6474', FALSE)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO carts (id, user_id, status, coupon_code)
@@ -124,8 +124,8 @@ VALUES
 ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee3', 'dddddddd-dddd-dddd-dddd-ddddddddddd1', '99999999-9999-9999-9999-999999999910', 1, 68)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO orders (id, user_id, store_id, address_id, order_number, status, payment_status, subtotal, discount_total, tax_total, delivery_fee, grand_total, age_confirmed, placed_at)
-VALUES ('ffffffff-ffff-ffff-ffff-fffffffffff1', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333333', 'cccccccc-cccc-cccc-cccc-ccccccccccc1', 'NK10001', 'assigned', 'paid', 522, 100, 73, 0, 495, FALSE, NOW())
+INSERT INTO orders (id, user_id, store_id, address_id, order_number, status, payment_status, subtotal, discount_total, tax_total, delivery_fee, grand_total, delivery_contact_name, delivery_mobile, delivery_address, delivery_latitude, delivery_longitude, google_map_link, age_confirmed, placed_at)
+VALUES ('ffffffff-ffff-ffff-ffff-fffffffffff1', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333333', 'cccccccc-cccc-cccc-cccc-ccccccccccc1', 'NK10001', 'assigned', 'paid', 522, 100, 73, 0, 495, 'Demo User', '9876543210', '12A, Sunrise Residency, 100 Feet Road, Indiranagar, Near Metro Station, Bangalore, Karnataka, 560038, India', 12.9719, 77.6408, 'https://www.google.com/maps?q=12.9719,77.6408', FALSE, NOW())
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO order_items (id, order_id, variant_id, product_name, variant_name, quantity, unit_price, tax_amount, line_total)

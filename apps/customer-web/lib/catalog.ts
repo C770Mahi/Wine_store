@@ -58,12 +58,25 @@ export interface CartData {
 export interface Address {
   id: string;
   label: string;
+  addressType: string;
   recipientName?: string;
+  fullName?: string;
   mobile?: string;
+  mobileNumber?: string;
+  houseNo: string;
+  apartmentName?: string;
+  streetArea: string;
+  landmark?: string;
   addressLine1: string;
+  formattedAddress: string;
   city: string;
   state: string;
+  country: string;
   pincode: string;
+  latitude: number | null;
+  longitude: number | null;
+  googleMapsLink: string;
+  isDefault: boolean;
 }
 
 export interface OfferBanner {
@@ -81,6 +94,77 @@ export interface CustomerOrder {
   paymentStatus: string;
   grandTotal: number;
   deliveryEta: string;
+  createdAt: string | null;
+  paymentMethod: string | null;
+  razorpayOrderId: string | null;
+  razorpayPaymentId: string | null;
+  deliveryAddress?: string;
+  googleMapsLink?: string;
+}
+
+export interface AddressPayload {
+  addressType: string;
+  fullName: string;
+  mobileNumber: string;
+  houseNo: string;
+  apartmentName?: string;
+  streetArea: string;
+  landmark?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  formattedAddress?: string;
+  isDefault?: boolean;
+}
+
+export interface OrderDeliveryAddress {
+  recipientName: string;
+  mobile: string;
+  addressLine1: string;
+  addressLine2: string | null;
+  landmark: string | null;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+export interface CustomerOrderDetail extends Omit<CustomerOrder, 'deliveryAddress'> {
+  deliveryAddress: OrderDeliveryAddress;
+}
+
+export interface OrderTrackingData {
+  orderId: string;
+  status: string;
+  timeline: string[];
+  driverLocation: { latitude: number; longitude: number } | null;
+  etaMinutes: number;
+}
+
+export interface RazorpayCheckoutSession {
+  checkoutSessionId: string;
+  razorpayOrderId: string;
+  amount: number;
+  currency: string;
+  keyId: string;
+  customer: {
+    name: string;
+    email?: string;
+    contact?: string;
+  };
+  description: string;
+  supportedMethods: string[];
+}
+
+export interface PaymentVerificationResult {
+  orderId: string;
+  orderNumber: string;
+  status: string;
+  paymentStatus: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
 }
 
 export const offerBanners: OfferBanner[] = [
@@ -169,17 +253,79 @@ export async function getAddresses() {
   return safeFetch(() => apiFetch<Address[]>('/location/addresses'), []);
 }
 
+export async function addAddressRequest(payload: AddressPayload) {
+  return apiFetch<Address>('/location/addresses', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function updateAddressRequest(addressId: string, payload: AddressPayload) {
+  return apiFetch<Address>(`/location/addresses/${addressId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function deleteAddressRequest(addressId: string) {
+  return apiFetch<{ id: string }>(`/location/addresses/${addressId}`, {
+    method: 'DELETE'
+  });
+}
+
+export async function setDefaultAddressRequest(addressId: string) {
+  return apiFetch<Address>(`/location/addresses/${addressId}/default`, {
+    method: 'POST'
+  });
+}
+
 export async function getOrders() {
   return safeFetch(() => apiFetch<CustomerOrder[]>('/orders'), []);
 }
 
-export async function createOrderRequest(payload: { addressId: string; slot?: string; paymentMethod?: string; ageConfirmed: boolean }) {
-  const response = await apiFetch<{ orderId: string; orderNumber: string; status: string; paymentStatus: string }>('/checkout/create-order', {
+export async function getOrderById(orderId: string) {
+  return safeFetch(() => apiFetch<CustomerOrderDetail>(`/orders/${orderId}`), null);
+}
+
+export async function getOrderTracking(orderId: string) {
+  return safeFetch(() => apiFetch<OrderTrackingData>(`/orders/${orderId}/tracking`), null);
+}
+
+export async function createCheckoutSessionRequest(payload: { addressId: string; slot?: string; ageConfirmed: boolean }) {
+  return apiFetch<RazorpayCheckoutSession>('/payments/razorpay/checkout-session', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function verifyRazorpayPaymentRequest(payload: {
+  checkoutSessionId: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}) {
+  const response = await apiFetch<PaymentVerificationResult>('/payments/razorpay/verify', {
     method: 'POST',
     body: JSON.stringify(payload)
   });
   notifyCartUpdated();
   return response;
+}
+
+export async function recordRazorpayFailureRequest(payload: {
+  checkoutSessionId: string;
+  razorpayOrderId?: string;
+  code?: string;
+  description?: string;
+  source?: string;
+  step?: string;
+  reason?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  return apiFetch<{ message: string }>('/payments/razorpay/failure', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
 }
 
 export async function addCartItemRequest(payload: { variantId: string; quantity?: number }) {

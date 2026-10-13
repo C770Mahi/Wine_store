@@ -11,11 +11,21 @@ class InsecureNeonWebSocket extends ws {
 
 neonConfig.webSocketConstructor = InsecureNeonWebSocket as unknown as NonNullable<typeof neonConfig.webSocketConstructor>;
 
-type QueryablePool = {
-  query<T extends QueryResultRow>(text: string, params?: unknown[]): Promise<{
-    rows: T[];
-    rowCount: number | null;
-  }>;
+type QueryResult<T extends QueryResultRow> = {
+  rows: T[];
+  rowCount: number | null;
+};
+
+type Queryable = {
+  query<T extends QueryResultRow>(text: string, params?: unknown[]): Promise<QueryResult<T>>;
+};
+
+type TransactionClient = Queryable & {
+  release(): void;
+};
+
+type ConnectablePool = Queryable & {
+  connect(): Promise<TransactionClient>;
 };
 
 function isLocalDatabase(connectionString: string) {
@@ -34,19 +44,19 @@ function buildPgPoolConfig(connectionString: string): PoolConfig {
   };
 }
 
-function createPool(connectionString: string): QueryablePool {
+function createPool(connectionString: string): ConnectablePool {
   if (isLocalDatabase(connectionString)) {
-    return new PgPool(buildPgPoolConfig(connectionString));
+    return new PgPool(buildPgPoolConfig(connectionString)) as unknown as ConnectablePool;
   }
 
   return new NeonPool({
     connectionString,
     max: 5,
     connectionTimeoutMillis: 30000
-  });
+  }) as unknown as ConnectablePool;
 }
 
-let pool: QueryablePool | null = null;
+let pool: ConnectablePool | null = null;
 
 if (env.databaseUrl) {
   pool = createPool(env.databaseUrl);
@@ -62,4 +72,24 @@ export async function dbQuery<T extends QueryResultRow>(text: string, params: un
   }
 
   return pool.query<T>(text, params);
+}
+
+export async function dbTransaction<T>(work: (client: TransactionClient) => Promise<T>) {
+  if (!pool) {
+    throw new Error('Database connection is not configured');
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const result = await work(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 }
