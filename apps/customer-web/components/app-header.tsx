@@ -175,13 +175,16 @@ export function AppHeader() {
               <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 sm:px-4 sm:py-3">
                 <span className="text-slate-400">🔎</span>
                 <input
+                  type="search"
+                  inputMode="search"
+                  enterKeyHint="search"
                   value={searchQuery}
                   onChange={(event) => {
                     setSearchQuery(event.target.value);
                     setIsSearchOpen(true);
                   }}
                   onFocus={() => setIsSearchOpen(true)}
-                  className="w-full bg-transparent text-sm outline-none"
+                  className="w-full bg-transparent text-base outline-none sm:text-sm"
                   placeholder="Search products, categories, offers"
                 />
               </div>

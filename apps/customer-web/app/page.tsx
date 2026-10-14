@@ -74,10 +74,6 @@ export default async function HomePage() {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand-dark">Near Kart mobile</p>
           <h1 className="mt-3 text-3xl font-black tracking-tight text-ink">Fresh groceries with a cleaner mobile look.</h1>
           <p className="mt-3 text-sm text-slate-600">Open fast picks, browse useful collections, and jump into today&apos;s essentials without the heavy yellow theme.</p>
-          <div className="mt-5 flex gap-3">
-            <Link href="/shop" className="btn-primary flex-1">Start shopping</Link>
-            <Link href="/cart" className="btn-secondary flex-1">Open cart</Link>
-          </div>
         </div>
 
         {mobileQuickCategories.length ? (

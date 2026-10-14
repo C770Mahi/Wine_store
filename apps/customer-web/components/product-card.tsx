@@ -8,6 +8,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const lowestVariant = product.variants[0];
+  const stockLabel = lowestVariant?.inStock ? 'In stock' : 'Out of stock';
 
   return (
     <article className="card flex h-full min-w-0 flex-col overflow-hidden">
@@ -38,6 +39,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <p className="text-[11px] text-muted sm:text-xs">Starts at</p>
             <p className="text-base font-extrabold text-ink sm:text-lg">{lowestVariant ? formatCurrency(lowestVariant.salePrice) : '—'}</p>
             <p className="text-[11px] text-muted line-through sm:text-xs">{lowestVariant ? formatCurrency(lowestVariant.mrp) : ''}</p>
+            <p className={`mt-1 text-[11px] font-semibold sm:text-xs ${lowestVariant?.inStock ? 'text-emerald-600' : 'text-rose-600'}`}>{stockLabel}</p>
           </div>
           {lowestVariant ? <AddToCartButton variantId={lowestVariant.id} className="btn-primary min-h-[44px] w-full px-3 py-2 text-xs sm:px-4 sm:text-sm" /> : null}
         </div>
