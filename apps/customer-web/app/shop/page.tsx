@@ -83,7 +83,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               <ShopSortControl value={sort} />
             </Suspense>
           </div>
-          <div className="grid gap-5 min-[390px]:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 xl:grid-cols-3">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

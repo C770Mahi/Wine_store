@@ -153,7 +153,7 @@ export default async function HomePage() {
               </div>
               <Link href="/shop" className="text-sm font-semibold text-brand">Browse</Link>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
               {mobileProductHighlights.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

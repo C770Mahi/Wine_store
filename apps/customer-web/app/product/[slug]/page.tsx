@@ -64,7 +64,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Related products</p>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-ink sm:text-3xl">You may also like</h2>
           </div>
-          <div className="grid gap-5 min-[390px]:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 xl:grid-cols-4">
             {relatedProducts.map((item) => (
               <ProductCard key={item.id} product={item} />
             ))}
