@@ -39,11 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </span>
               </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                <article className="rounded-2xl bg-white p-4 ring-1 ring-slate-100">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Coverage</p>
-                  <p className="mt-2 text-sm font-semibold text-ink">Indiranagar, Koramangala, Whitefield, HSR Layout, JP Nagar and nearby delivery zones.</p>
-                </article>
+              <div className="mt-4 space-y-3">
                 <article className="rounded-2xl bg-gradient-to-r from-brand-soft via-white to-amber-50 p-4 ring-1 ring-brand/10 shadow-sm">
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl shadow-sm motion-safe:animate-pulse">🚚</div>
@@ -54,10 +50,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </div>
                   <p className="mt-2 text-sm text-muted">Fast & Reliable Delivery at Your Doorstep</p>
                 </article>
-                <article className="rounded-2xl bg-white p-4 ring-1 ring-slate-100">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Operations</p>
-                  <p className="mt-2 text-sm font-semibold text-ink">Pincode checks, OTP login, delivery orchestration, and reliable order handling.</p>
-                </article>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <article className="rounded-2xl bg-white p-4 ring-1 ring-slate-100">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Coverage</p>
+                    <p className="mt-2 text-sm font-semibold text-ink">Indiranagar, Koramangala, Whitefield, HSR Layout, JP Nagar and nearby delivery zones.</p>
+                  </article>
+                  <article className="rounded-2xl bg-white p-4 ring-1 ring-slate-100">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Operations</p>
+                    <p className="mt-2 text-sm font-semibold text-ink">Pincode checks, OTP login, delivery orchestration, and reliable order handling.</p>
+                  </article>
+                </div>
               </div>
             </div>
           </div>
