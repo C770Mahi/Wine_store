@@ -90,10 +90,11 @@ export async function getCart(userId = DEMO_USER_ID) {
     volume_ml: number;
     pack_type: string;
   }>(
-    `SELECT ci.id, ci.variant_id, ci.quantity, ci.unit_price, p.name AS product_name, p.image AS product_image, pv.volume_ml, pv.pack_type
+    `SELECT ci.id, ci.variant_id, ci.quantity, ci.unit_price, p.name AS product_name, pi.image_url AS product_image, pv.volume_ml, pv.pack_type
      FROM cart_items ci
      INNER JOIN product_variants pv ON pv.id = ci.variant_id
      INNER JOIN products p ON p.id = pv.product_id
+     LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.sort_order = 0
      WHERE ci.cart_id = $1
      ORDER BY ci.created_at ASC`,
     [cartId]
