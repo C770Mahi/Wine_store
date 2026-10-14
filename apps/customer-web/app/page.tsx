@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { CategoryRail } from '@/components/category-rail';
+import { DussehraBlessingOverlay } from '@/components/dussehra-blessing-overlay';
 import { OfferBanner } from '@/components/offer-banner';
 import { ProductCard } from '@/components/product-card';
 import { getCategories, getProducts, offerBanners } from '@/lib/catalog';
@@ -67,6 +68,7 @@ export default async function HomePage() {
 
   return (
     <main className="bg-gradient-to-b from-sky-50 via-white to-emerald-50 pb-16">
+      <DussehraBlessingOverlay />
       <section className="page-shell pt-4 sm:hidden">
         <div className="overflow-hidden rounded-[2rem] border border-white/80 bg-gradient-to-br from-white via-sky-50 to-teal-50 p-5 shadow-card">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand-dark">Near Kart mobile</p>

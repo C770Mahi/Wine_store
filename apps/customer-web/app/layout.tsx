@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import './globals.css';
 import { AppHeader } from '@/components/app-header';
+import { MobileBottomNav } from '@/components/mobile-bottom-nav';
 
 export const metadata: Metadata = {
   title: 'Near Kart',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>
+      <body className="pb-24 md:pb-0">
         <Suspense fallback={null}>
           <AppHeader />
         </Suspense>
@@ -32,6 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         </footer>
+        <Suspense fallback={null}>
+          <MobileBottomNav />
+        </Suspense>
       </body>
     </html>
   );
