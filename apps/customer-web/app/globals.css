@@ -36,4 +36,12 @@
   .btn-secondary {
     @apply inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-800 transition hover:bg-slate-50;
   }
+
+  .product-grid {
+    @apply grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 md:grid-cols-3 md:gap-5 lg:grid-cols-4;
+  }
+
+  .category-filter-grid {
+    @apply mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-1;
+  }
 }
