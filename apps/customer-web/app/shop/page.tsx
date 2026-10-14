@@ -82,13 +82,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         </div>
       </div>
 
-      <div className="grid h-[calc(100dvh-11.5rem)] grid-cols-[78px_minmax(0,1fr)] items-start gap-3 overflow-hidden min-[375px]:grid-cols-[88px_minmax(0,1fr)] sm:h-[calc(100dvh-12rem)] sm:grid-cols-[104px_minmax(0,1fr)] lg:h-auto lg:gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:overflow-visible">
-        <aside className="sticky top-20 h-[calc(100dvh-11.5rem)] overflow-y-auto overscroll-contain px-1 py-1 sm:top-24 sm:h-[calc(100dvh-12rem)] sm:px-2 lg:top-28 lg:h-auto lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:rounded-3xl lg:border lg:border-slate-200 lg:bg-white lg:p-5 lg:shadow-card">
-          <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-brand lg:px-0 lg:text-sm">Categories</p>
-          <div className="category-filter-grid">
-            <Link href="/shop" className={`inline-flex min-h-[68px] min-w-0 flex-col items-center justify-center gap-1.5 rounded-2xl px-1.5 py-2 text-center text-[10px] font-semibold leading-4 transition lg:min-h-[48px] lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:py-3 lg:text-sm lg:leading-5 ${activeCategory ? 'bg-slate-50 text-slate-600 lg:border lg:border-slate-200 lg:bg-white lg:hover:border-brand/40 lg:hover:text-brand' : 'bg-brand-soft/80 text-brand-dark lg:border lg:border-brand lg:bg-brand lg:text-white lg:shadow-sm'}`}>
-              <span className={`text-base lg:text-base ${activeCategory ? 'text-slate-500 lg:text-slate-600' : 'text-brand-dark lg:text-white'}`}>◫</span>
-              <span className="line-clamp-2 break-words lg:line-clamp-1">All</span>
+      <div className="relative lg:grid lg:items-start lg:gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+        <aside className="fixed bottom-24 left-3 top-[11.75rem] z-20 w-[82px] overflow-y-auto overscroll-contain px-1 py-1 [touch-action:pan-y] min-[375px]:w-[92px] sm:left-4 sm:top-[12.5rem] sm:w-[104px] lg:hidden">
+          <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-brand">Categories</p>
+          <div className="category-filter-grid mt-2">
+            <Link href="/shop" className={`inline-flex min-h-[68px] min-w-0 select-none flex-col items-center justify-center gap-1.5 rounded-2xl border px-1.5 py-2 text-center text-[10px] font-semibold leading-4 shadow-sm transition [touch-action:manipulation] [webkit-tap-highlight-color:transparent] active:scale-100 ${activeCategory ? 'border-slate-200 bg-white text-slate-600' : 'border-brand/40 bg-brand-soft/80 text-brand-dark shadow-[0_8px_20px_rgba(22,163,74,0.12)]'}`}>
+              <span className={`text-base ${activeCategory ? 'text-slate-500' : 'text-brand-dark'}`}>◫</span>
+              <span className="line-clamp-2 break-words">All</span>
             </Link>
             {categories.map((category) => {
               const isActive = activeCategory === category;
@@ -97,17 +97,41 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 <Link
                   key={category}
                   href={`/shop?category=${encodeURIComponent(category)}`}
-                  className={`inline-flex min-h-[68px] min-w-0 flex-col items-center justify-center gap-1.5 rounded-2xl px-1.5 py-2 text-center text-[10px] font-semibold leading-4 transition lg:min-h-[48px] lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:py-3 lg:text-sm lg:leading-5 ${isActive ? 'bg-brand-soft/80 text-brand-dark lg:border lg:border-brand lg:bg-brand lg:text-white lg:shadow-sm' : 'text-slate-600 hover:bg-slate-100/70 hover:text-brand-dark lg:border lg:border-slate-200 lg:bg-white lg:hover:border-brand/40 lg:hover:text-brand'}`}
+                  className={`inline-flex min-h-[68px] min-w-0 select-none flex-col items-center justify-center gap-1.5 rounded-2xl border px-1.5 py-2 text-center text-[10px] font-semibold leading-4 shadow-sm transition [touch-action:manipulation] [webkit-tap-highlight-color:transparent] active:scale-100 ${isActive ? 'border-brand/40 bg-brand-soft/80 text-brand-dark shadow-[0_8px_20px_rgba(22,163,74,0.12)]' : 'border-slate-200 bg-white text-slate-600'}`}
                 >
-                  <span className={`text-base lg:text-base ${isActive ? 'text-brand-dark lg:text-white' : 'text-slate-500 lg:text-brand-dark'}`}>{icon}</span>
-                  <span className="line-clamp-2 break-words lg:line-clamp-1">{category}</span>
+                  <span className={`text-base ${isActive ? 'text-brand-dark' : 'text-slate-500'}`}>{icon}</span>
+                  <span className="line-clamp-2 break-words">{category}</span>
                 </Link>
               );
             })}
           </div>
         </aside>
 
-        <section className="min-w-0 overflow-y-auto overscroll-contain pr-1">
+        <aside className="hidden lg:block lg:sticky lg:top-28 lg:h-auto lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:rounded-3xl lg:border lg:border-slate-200 lg:bg-white lg:p-5 lg:shadow-card">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand">Categories</p>
+          <div className="category-filter-grid mt-3">
+            <Link href="/shop" className={`inline-flex min-h-[48px] min-w-0 items-center justify-start gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-semibold leading-5 transition ${activeCategory ? 'border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand' : 'border-brand bg-brand text-white shadow-sm'}`}>
+              <span className={`text-base ${activeCategory ? 'text-slate-600' : 'text-white'}`}>◫</span>
+              <span className="line-clamp-1 break-words">All categories</span>
+            </Link>
+            {categories.map((category) => {
+              const isActive = activeCategory === category;
+              const icon = categoryIcons[category] ?? '🛒';
+              return (
+                <Link
+                  key={category}
+                  href={`/shop?category=${encodeURIComponent(category)}`}
+                  className={`inline-flex min-h-[48px] min-w-0 items-center justify-start gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-semibold leading-5 transition ${isActive ? 'border-brand bg-brand text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand'}`}
+                >
+                  <span className={`text-base ${isActive ? 'text-white' : 'text-brand-dark'}`}>{icon}</span>
+                  <span className="line-clamp-1 break-words">{category}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </aside>
+
+        <section className="ml-[94px] h-[calc(100svh-12rem)] min-w-0 overflow-y-auto overscroll-contain pr-1 [touch-action:pan-y] min-[375px]:ml-[104px] sm:ml-[120px] sm:h-[calc(100svh-13rem)] lg:ml-0 lg:h-auto lg:overflow-visible">
           <div className="mb-4 flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white px-3 py-3 shadow-card sm:px-5 sm:py-4">
             <div>
               <p className="font-semibold text-ink">{products.length} products available</p>
