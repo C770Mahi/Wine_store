@@ -82,12 +82,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-[84px_minmax(0,1fr)] items-start gap-3 min-[375px]:grid-cols-[92px_minmax(0,1fr)] sm:grid-cols-[108px_minmax(0,1fr)] lg:gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-        <aside className="card sticky top-20 h-fit max-h-[calc(100vh-6rem)] overflow-y-auto p-2 sm:top-24 sm:p-3 lg:p-5">
-          <p className="px-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand lg:px-0 lg:text-sm">Categories</p>
+      <div className="grid h-[calc(100dvh-11.5rem)] grid-cols-[78px_minmax(0,1fr)] items-start gap-3 overflow-hidden min-[375px]:grid-cols-[88px_minmax(0,1fr)] sm:h-[calc(100dvh-12rem)] sm:grid-cols-[104px_minmax(0,1fr)] lg:h-auto lg:gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:overflow-visible">
+        <aside className="sticky top-20 h-[calc(100dvh-11.5rem)] overflow-y-auto overscroll-contain px-1 py-1 sm:top-24 sm:h-[calc(100dvh-12rem)] sm:px-2 lg:top-28 lg:h-auto lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:rounded-3xl lg:border lg:border-slate-200 lg:bg-white lg:p-5 lg:shadow-card">
+          <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-brand lg:px-0 lg:text-sm">Categories</p>
           <div className="category-filter-grid">
-            <Link href="/shop" className={`inline-flex min-h-[74px] min-w-0 flex-col items-center justify-center gap-2 rounded-2xl px-2 py-3 text-center text-[11px] font-semibold leading-4 transition lg:min-h-[48px] lg:flex-row lg:justify-start lg:px-4 lg:text-sm lg:leading-5 ${activeCategory ? 'border border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand' : 'border border-brand bg-brand text-white shadow-sm'}`}>
-              <span className={`flex h-8 w-8 items-center justify-center rounded-2xl text-sm lg:h-9 lg:w-9 lg:text-base ${activeCategory ? 'bg-slate-100 text-slate-600' : 'bg-white/20 text-white'}`}>◫</span>
+            <Link href="/shop" className={`inline-flex min-h-[68px] min-w-0 flex-col items-center justify-center gap-1.5 rounded-2xl px-1.5 py-2 text-center text-[10px] font-semibold leading-4 transition lg:min-h-[48px] lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:py-3 lg:text-sm lg:leading-5 ${activeCategory ? 'bg-slate-50 text-slate-600 lg:border lg:border-slate-200 lg:bg-white lg:hover:border-brand/40 lg:hover:text-brand' : 'bg-brand-soft/80 text-brand-dark lg:border lg:border-brand lg:bg-brand lg:text-white lg:shadow-sm'}`}>
+              <span className={`text-base lg:text-base ${activeCategory ? 'text-slate-500 lg:text-slate-600' : 'text-brand-dark lg:text-white'}`}>◫</span>
               <span className="line-clamp-2 break-words lg:line-clamp-1">All</span>
             </Link>
             {categories.map((category) => {
@@ -97,9 +97,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 <Link
                   key={category}
                   href={`/shop?category=${encodeURIComponent(category)}`}
-                  className={`inline-flex min-h-[74px] min-w-0 flex-col items-center justify-center gap-2 rounded-2xl px-2 py-3 text-center text-[11px] font-semibold leading-4 transition lg:min-h-[48px] lg:flex-row lg:justify-start lg:px-4 lg:text-sm lg:leading-5 ${isActive ? 'border border-brand bg-brand text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-brand/40 hover:text-brand'}`}
+                  className={`inline-flex min-h-[68px] min-w-0 flex-col items-center justify-center gap-1.5 rounded-2xl px-1.5 py-2 text-center text-[10px] font-semibold leading-4 transition lg:min-h-[48px] lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:py-3 lg:text-sm lg:leading-5 ${isActive ? 'bg-brand-soft/80 text-brand-dark lg:border lg:border-brand lg:bg-brand lg:text-white lg:shadow-sm' : 'text-slate-600 hover:bg-slate-100/70 hover:text-brand-dark lg:border lg:border-slate-200 lg:bg-white lg:hover:border-brand/40 lg:hover:text-brand'}`}
                 >
-                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl text-sm lg:h-9 lg:w-9 lg:text-base ${isActive ? 'bg-white/20 text-white' : 'bg-brand-soft text-brand-dark'}`}>{icon}</span>
+                  <span className={`text-base lg:text-base ${isActive ? 'text-brand-dark lg:text-white' : 'text-slate-500 lg:text-brand-dark'}`}>{icon}</span>
                   <span className="line-clamp-2 break-words lg:line-clamp-1">{category}</span>
                 </Link>
               );
@@ -107,7 +107,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           </div>
         </aside>
 
-        <section className="min-w-0">
+        <section className="min-w-0 overflow-y-auto overscroll-contain pr-1">
           <div className="mb-4 flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white px-3 py-3 shadow-card sm:px-5 sm:py-4">
             <div>
               <p className="font-semibold text-ink">{products.length} products available</p>

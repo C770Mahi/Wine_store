@@ -35,7 +35,6 @@ export function AppHeader() {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
   const searchParamKey = searchParams.toString();
   const isShopPage = pathname === '/shop';
@@ -121,7 +120,6 @@ export function AppHeader() {
 
   useEffect(() => {
     setIsSearchOpen(false);
-    setIsMenuOpen(false);
   }, [pathname, searchParamKey]);
 
   const normalizedSearchQuery = searchQuery.trim().replace(/\s+/g, ' ');
@@ -170,7 +168,7 @@ export function AppHeader() {
             </div>
           </div>
 
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:max-w-3xl lg:justify-end">
+          <div className="flex w-full flex-col gap-3 lg:max-w-3xl lg:justify-end">
             <div ref={searchContainerRef} className="relative w-full">
               <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 sm:px-4 sm:py-3">
                 <span className="text-slate-400">🔎</span>
@@ -243,21 +241,6 @@ export function AppHeader() {
               ) : null}
             </div>
 
-            <div className="flex items-center gap-2 lg:hidden">
-              <Link href="/cart" className="btn-primary min-h-[44px] flex-1 justify-center whitespace-nowrap px-4 sm:flex-none">
-                Cart{cartCount ? ` (${cartCount})` : ''}
-              </Link>
-              <button
-                type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-xl text-ink"
-                aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-                aria-expanded={isMenuOpen}
-                onClick={() => setIsMenuOpen((current) => !current)}
-              >
-                {isMenuOpen ? '✕' : '☰'}
-              </button>
-            </div>
-
             <div className="hidden items-center gap-3 lg:flex">
               <Link href="/cart" className="btn-primary justify-center whitespace-nowrap px-4">
                 Cart{cartCount ? ` (${cartCount})` : ''}
@@ -267,8 +250,8 @@ export function AppHeader() {
           </div>
         </div>
 
-        <div className={`${isMenuOpen || !isShopPage ? 'mt-4' : 'hidden'} ${isMenuOpen ? 'block' : 'hidden'} lg:mt-4 lg:block`}>
-          <div className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-4 lg:flex-row lg:items-center lg:justify-between lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
+        <div className="mt-4 hidden lg:block">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:p-0">
             {isShopPage ? null : (
               <nav className="grid gap-2 sm:grid-cols-2 lg:flex lg:gap-2 lg:overflow-x-auto lg:pb-1 lg:pr-1">
                 {navItems.map((item) => {
@@ -285,10 +268,6 @@ export function AppHeader() {
                 })}
               </nav>
             )}
-
-            <div className="flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 lg:hidden">
-              {profileControls ?? authControls}
-            </div>
 
             <div className="hidden min-h-10 flex-wrap items-center gap-2 text-sm sm:gap-3 lg:flex">
               {authControls}
