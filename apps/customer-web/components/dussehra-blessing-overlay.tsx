@@ -54,82 +54,156 @@ function DurgaFigure({ phase }: { phase: Phase }) {
   const blessingActive = phase !== 'entry';
 
   return (
-    <svg viewBox="0 0 360 440" className="h-auto w-full drop-shadow-[0_20px_60px_rgba(120,42,10,0.35)]" role="img" aria-label="Stylised festive illustration of Goddess Durga">
+    <svg viewBox="0 0 420 520" className="h-auto w-full drop-shadow-[0_30px_90px_rgba(120,42,10,0.38)]" role="img" aria-label="Festive premium illustration of Goddess Durga">
       <defs>
-        <radialGradient id="durga-aura" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="rgba(255,244,179,0.95)" />
-          <stop offset="55%" stopColor="rgba(255,184,77,0.65)" />
-          <stop offset="100%" stopColor="rgba(255,184,77,0)" />
+        <radialGradient id="durga-aura-core" cx="50%" cy="42%" r="48%">
+          <stop offset="0%" stopColor="#fff7d1" stopOpacity="0.96" />
+          <stop offset="48%" stopColor="#ffd166" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#ffd166" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id="durga-robe" x1="0%" x2="100%" y1="0%" y2="100%">
-          <stop offset="0%" stopColor="#c81e1e" />
-          <stop offset="55%" stopColor="#e85b28" />
-          <stop offset="100%" stopColor="#8f0c1f" />
+        <radialGradient id="durga-aura-shell" cx="50%" cy="42%" r="66%">
+          <stop offset="0%" stopColor="#ffedd5" stopOpacity="0.3" />
+          <stop offset="58%" stopColor="#fb923c" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#7f1d1d" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="durga-robe-main" x1="10%" x2="90%" y1="0%" y2="100%">
+          <stop offset="0%" stopColor="#ff7a45" />
+          <stop offset="40%" stopColor="#d62839" />
+          <stop offset="100%" stopColor="#6f1024" />
+        </linearGradient>
+        <linearGradient id="durga-robe-shadow" x1="0%" x2="100%" y1="10%" y2="100%">
+          <stop offset="0%" stopColor="#f6c453" />
+          <stop offset="55%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#b45309" />
         </linearGradient>
         <linearGradient id="durga-gold" x1="0%" x2="100%" y1="0%" y2="100%">
-          <stop offset="0%" stopColor="#fff3b0" />
-          <stop offset="45%" stopColor="#f5b942" />
-          <stop offset="100%" stopColor="#b77912" />
+          <stop offset="0%" stopColor="#fff4ba" />
+          <stop offset="45%" stopColor="#f7c948" />
+          <stop offset="100%" stopColor="#b7791f" />
+        </linearGradient>
+        <linearGradient id="durga-gold-deep" x1="0%" x2="0%" y1="0%" y2="100%">
+          <stop offset="0%" stopColor="#ffe9a6" />
+          <stop offset="100%" stopColor="#b45309" />
         </linearGradient>
         <linearGradient id="durga-skin" x1="0%" x2="100%" y1="0%" y2="100%">
-          <stop offset="0%" stopColor="#f7d7b5" />
-          <stop offset="100%" stopColor="#efc39a" />
+          <stop offset="0%" stopColor="#f9dfc3" />
+          <stop offset="55%" stopColor="#f2c8a5" />
+          <stop offset="100%" stopColor="#deaa83" />
         </linearGradient>
+        <linearGradient id="durga-hair" x1="0%" x2="100%" y1="0%" y2="100%">
+          <stop offset="0%" stopColor="#451a24" />
+          <stop offset="100%" stopColor="#16070d" />
+        </linearGradient>
+        <linearGradient id="durga-metal" x1="0%" x2="100%" y1="0%" y2="100%">
+          <stop offset="0%" stopColor="#fef3c7" />
+          <stop offset="45%" stopColor="#d1d5db" />
+          <stop offset="100%" stopColor="#9ca3af" />
+        </linearGradient>
+        <filter id="durga-soft-glow" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="12" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
 
-      <ellipse cx="180" cy="170" rx="130" ry="150" fill="url(#durga-aura)" />
-      <ellipse cx="180" cy="360" rx="130" ry="45" fill="rgba(127,29,29,0.16)" />
+      <motion.g
+        initial={false}
+        animate={phase === 'entry' ? { rotate: -3 } : { rotate: 3 }}
+        transition={{ duration: 7, repeat: Number.POSITIVE_INFINITY, repeatType: 'mirror', ease: 'easeInOut' }}
+        style={{ transformOrigin: '210px 206px' }}
+      >
+        <ellipse cx="210" cy="205" rx="164" ry="184" fill="url(#durga-aura-shell)" />
+        <ellipse cx="210" cy="205" rx="136" ry="158" fill="url(#durga-aura-core)" filter="url(#durga-soft-glow)" />
+      </motion.g>
 
-      <g opacity="0.92">
-        <path d="M82 354C102 314 136 292 180 292C224 292 258 314 278 354C248 340 216 332 180 332C144 332 112 340 82 354Z" fill="#f6c453" />
-        <path d="M95 362C113 328 143 308 180 308C217 308 247 328 265 362C237 350 208 344 180 344C152 344 123 350 95 362Z" fill="#ffdf82" opacity="0.9" />
+      <g opacity="0.88">
+        <path d="M119 420C145 372 176 348 210 348C244 348 275 372 301 420C269 407 239 401 210 401C181 401 151 407 119 420Z" fill="#f5c44c" />
+        <path d="M96 444C122 397 160 370 210 370C260 370 298 397 324 444C290 431 252 424 210 424C168 424 130 431 96 444Z" fill="#ffe18c" opacity="0.94" />
+      </g>
+
+      <g opacity="0.94">
+        <path d="M93 248C74 240 61 226 54 206C73 206 92 220 111 248Z" fill="url(#durga-metal)" />
+        <path d="M113 230C104 213 94 202 84 196C74 190 64 188 54 191" fill="none" stroke="url(#durga-skin)" strokeWidth="14" strokeLinecap="round" />
+        <circle cx="49" cy="190" r="14" fill="url(#durga-skin)" />
+        <circle cx="44" cy="190" r="10" fill="#fff7d1" opacity="0.68" />
+      </g>
+
+      <g opacity="0.94">
+        <path d="M327 172V280" stroke="url(#durga-gold-deep)" strokeWidth="7" strokeLinecap="round" />
+        <path d="M327 156L345 188H309Z" fill="url(#durga-metal)" />
+        <path d="M327 142L339 166H315Z" fill="url(#durga-gold)" />
+        <path d="M289 234C298 214 307 201 317 195C327 189 338 190 351 198" fill="none" stroke="url(#durga-skin)" strokeWidth="14" strokeLinecap="round" />
+        <circle cx="357" cy="201" r="14" fill="url(#durga-skin)" />
+      </g>
+
+      <g>
+        <path d="M129 210C141 170 168 144 210 144C252 144 279 170 291 210L279 326H141Z" fill="url(#durga-robe-main)" />
+        <path d="M162 226C171 198 187 177 210 164C233 177 249 198 258 226L249 345H171Z" fill="url(#durga-robe-shadow)" opacity="0.94" />
+        <path d="M145 324H275L302 438H118Z" fill="url(#durga-robe-main)" />
+        <path d="M193 149H227V338H193Z" fill="url(#durga-gold)" opacity="0.9" />
+        <path d="M152 339C173 322 192 312 210 308C228 312 247 322 268 339L253 384H167Z" fill="#f59e0b" opacity="0.76" />
+      </g>
+
+      <g>
+        <path d="M144 163C156 113 179 86 210 86C241 86 264 113 276 163L262 174C250 132 233 111 210 111C187 111 170 132 158 174Z" fill="url(#durga-hair)" />
+        <ellipse cx="210" cy="176" rx="66" ry="78" fill="url(#durga-hair)" opacity="0.96" />
+        <ellipse cx="210" cy="180" rx="46" ry="61" fill="url(#durga-skin)" />
+        <ellipse cx="193" cy="177" rx="4.4" ry="5.2" fill="#5b1f1f" />
+        <ellipse cx="227" cy="177" rx="4.4" ry="5.2" fill="#5b1f1f" />
+        <path d="M183 165C188 161 194 160 199 162" stroke="#6b1b1b" strokeWidth="3" strokeLinecap="round" fill="none" />
+        <path d="M221 162C226 160 232 161 237 165" stroke="#6b1b1b" strokeWidth="3" strokeLinecap="round" fill="none" />
+        <path d="M199 203C206 208 214 208 221 203" stroke="#a32128" strokeWidth="4" strokeLinecap="round" fill="none" />
+        <path d="M210 142L217 156L210 166L203 156Z" fill="#c81e1e" />
+        <path d="M209 178L213 191L207 191Z" fill="#d18b5b" />
+        <circle cx="170" cy="195" r="14" fill="url(#durga-gold)" opacity="0.9" />
+        <circle cx="250" cy="195" r="14" fill="url(#durga-gold)" opacity="0.9" />
+      </g>
+
+      <g>
+        <path d="M210 52L232 86H188Z" fill="url(#durga-gold)" />
+        <path d="M165 106L179 60L197 97Z" fill="url(#durga-gold)" />
+        <path d="M255 106L241 60L223 97Z" fill="url(#durga-gold)" />
+        <path d="M154 122C175 71 194 46 210 46C226 46 245 71 266 122" fill="none" stroke="url(#durga-gold)" strokeWidth="12" strokeLinecap="round" />
+        <path d="M130 138L151 109L162 145Z" fill="url(#durga-gold-deep)" />
+        <path d="M290 138L269 109L258 145Z" fill="url(#durga-gold-deep)" />
+        <circle cx="210" cy="70" r="12" fill="#fff4ba" />
+        <circle cx="210" cy="92" r="7" fill="#ef4444" />
+      </g>
+
+      <g>
+        <path d="M173 245C183 256 195 263 210 267C225 263 237 256 247 245" fill="none" stroke="url(#durga-gold)" strokeWidth="8" strokeLinecap="round" />
+        <path d="M164 267C177 280 193 287 210 290C227 287 243 280 256 267" fill="none" stroke="url(#durga-gold)" strokeWidth="6" strokeLinecap="round" />
+        <circle cx="210" cy="278" r="13" fill="url(#durga-gold)" />
+        <path d="M181 303H239" stroke="url(#durga-gold)" strokeWidth="8" strokeLinecap="round" />
+      </g>
+
+      <g>
+        <path d="M160 282C149 261 135 248 120 246C105 244 92 251 80 266" fill="none" stroke="url(#durga-skin)" strokeWidth="16" strokeLinecap="round" />
+        <circle cx="73" cy="272" r="18" fill="url(#durga-skin)" />
       </g>
 
       <motion.g
         initial={false}
-        animate={blessingActive ? { rotate: -12, x: 4, y: -12 } : { rotate: 22, x: 40, y: 18 }}
+        animate={blessingActive ? { rotate: -10, x: 2, y: -10 } : { rotate: 20, x: 42, y: 20 }}
         transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
-        style={{ transformOrigin: '252px 214px' }}
+        style={{ transformOrigin: '296px 246px' }}
       >
-        <path d="M212 214C228 206 241 205 252 212C263 219 266 231 262 248L249 248C250 236 247 228 240 224C233 220 225 221 216 228Z" fill="url(#durga-skin)" />
-        <circle cx="258" cy="213" r="17" fill="url(#durga-skin)" />
-        <path d="M252 198C259 203 262 211 261 219C253 220 246 217 240 211C243 204 247 200 252 198Z" fill="#f8d57c" opacity="0.8" />
+        <path d="M259 279C268 257 280 243 296 239C312 235 325 241 336 257" fill="none" stroke="url(#durga-skin)" strokeWidth="16" strokeLinecap="round" />
+        <circle cx="343" cy="262" r="18" fill="url(#durga-skin)" />
+        <path d="M338 247C345 252 348 261 347 270C337 272 329 268 323 260C327 252 332 248 338 247Z" fill="#fbe19d" opacity="0.88" />
       </motion.g>
 
-      <g>
-        <path d="M149 226C136 212 122 205 106 206C90 207 77 216 66 234L79 241C88 228 98 221 108 220C118 219 129 225 140 238Z" fill="url(#durga-skin)" />
-        <circle cx="60" cy="240" r="15" fill="url(#durga-skin)" />
-      </g>
-
-      <g>
-        <path d="M106 155C124 118 149 100 180 100C211 100 236 118 254 155L242 252H118Z" fill="url(#durga-robe)" />
-        <path d="M140 260C148 224 161 198 180 182C199 198 212 224 220 260Z" fill="#f59e0b" opacity="0.82" />
-        <path d="M122 250H238L256 342H104Z" fill="url(#durga-robe)" />
-        <path d="M156 155H204V250H156Z" fill="#f3b343" opacity="0.88" />
-      </g>
-
-      <g>
-        <path d="M126 122C138 89 156 72 180 72C204 72 222 89 234 122L221 132C210 105 196 92 180 92C164 92 150 105 139 132Z" fill="#31111d" />
-        <ellipse cx="180" cy="136" rx="52" ry="60" fill="#2c0b15" opacity="0.88" />
-        <ellipse cx="180" cy="139" rx="37" ry="48" fill="url(#durga-skin)" />
-        <circle cx="166" cy="136" r="3.5" fill="#5b1910" />
-        <circle cx="194" cy="136" r="3.5" fill="#5b1910" />
-        <path d="M166 160C175 166 185 166 194 160" stroke="#8a1c1c" strokeWidth="4" strokeLinecap="round" fill="none" />
-        <path d="M180 109L186 123L180 131L174 123Z" fill="#b91c1c" />
-      </g>
-
-      <g>
-        <path d="M180 40L202 67H158Z" fill="url(#durga-gold)" />
-        <path d="M131 88L145 52L162 84Z" fill="url(#durga-gold)" />
-        <path d="M229 88L215 52L198 84Z" fill="url(#durga-gold)" />
-        <path d="M140 95C157 56 170 37 180 37C190 37 203 56 220 95" fill="none" stroke="url(#durga-gold)" strokeWidth="10" strokeLinecap="round" />
-        <circle cx="180" cy="53" r="11" fill="#fff3b0" />
-      </g>
-
-      <g>
-        <ellipse cx="124" cy="180" rx="14" ry="25" fill="#f5c49f" opacity="0.92" />
-        <ellipse cx="236" cy="180" rx="14" ry="25" fill="#f5c49f" opacity="0.92" />
-      </g>
+      <motion.g
+        initial={false}
+        animate={phase === 'entry' ? { y: 8, rotate: -4 } : { y: -2, rotate: 3 }}
+        transition={{ duration: 2.2, ease: 'easeInOut' }}
+        style={{ transformOrigin: '210px 428px' }}
+      >
+        <path d="M116 437C148 421 179 413 210 413C241 413 272 421 304 437" fill="none" stroke="#f5c44c" strokeWidth="12" strokeLinecap="round" />
+        <path d="M142 454C162 442 185 436 210 436C235 436 258 442 278 454" fill="none" stroke="#fff0ab" strokeWidth="10" strokeLinecap="round" />
+      </motion.g>
     </svg>
   );
 }
@@ -185,29 +259,83 @@ export function DussehraBlessingOverlay() {
       }
 
       const time = context.currentTime;
-      const strikeOne = context.createOscillator();
-      const strikeTwo = context.createOscillator();
-      const gain = context.createGain();
+      const compressor = context.createDynamicsCompressor();
+      const highpass = context.createBiquadFilter();
+      const lowpass = context.createBiquadFilter();
+      const master = context.createGain();
 
-      strikeOne.type = 'sine';
-      strikeOne.frequency.setValueAtTime(512, time);
-      strikeOne.frequency.exponentialRampToValueAtTime(226, time + 1.9);
-      strikeTwo.type = 'triangle';
-      strikeTwo.frequency.setValueAtTime(784, time + 0.04);
-      strikeTwo.frequency.exponentialRampToValueAtTime(348, time + 1.4);
+      compressor.threshold.setValueAtTime(-22, time);
+      compressor.knee.setValueAtTime(18, time);
+      compressor.ratio.setValueAtTime(3, time);
+      compressor.attack.setValueAtTime(0.003, time);
+      compressor.release.setValueAtTime(0.18, time);
 
-      gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.exponentialRampToValueAtTime(0.08, time + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + 2.1);
+      highpass.type = 'highpass';
+      highpass.frequency.setValueAtTime(170, time);
+      lowpass.type = 'lowpass';
+      lowpass.frequency.setValueAtTime(2400, time);
+      lowpass.Q.setValueAtTime(0.8, time);
 
-      strikeOne.connect(gain);
-      strikeTwo.connect(gain);
-      gain.connect(context.destination);
+      master.gain.setValueAtTime(0.0001, time);
+      master.gain.exponentialRampToValueAtTime(0.3, time + 0.03);
+      master.gain.exponentialRampToValueAtTime(0.12, time + 0.42);
+      master.gain.exponentialRampToValueAtTime(0.0001, time + 4.8);
 
-      strikeOne.start(time);
-      strikeTwo.start(time + 0.03);
-      strikeOne.stop(time + 2.2);
-      strikeTwo.stop(time + 1.8);
+      master.connect(highpass);
+      highpass.connect(lowpass);
+      lowpass.connect(compressor);
+      compressor.connect(context.destination);
+
+      const partials = [
+        { frequency: 392, gain: 0.8, decay: 4.8, type: 'sine' as OscillatorType },
+        { frequency: 587, gain: 0.46, decay: 4.1, type: 'triangle' as OscillatorType },
+        { frequency: 783, gain: 0.28, decay: 3.4, type: 'sine' as OscillatorType },
+        { frequency: 1174, gain: 0.16, decay: 2.7, type: 'triangle' as OscillatorType },
+        { frequency: 1568, gain: 0.09, decay: 2.1, type: 'sine' as OscillatorType }
+      ];
+
+      partials.forEach((partial, index) => {
+        const oscillator = context.createOscillator();
+        const partialGain = context.createGain();
+
+        oscillator.type = partial.type;
+        oscillator.frequency.setValueAtTime(partial.frequency, time);
+        oscillator.frequency.exponentialRampToValueAtTime(partial.frequency * 0.985, time + partial.decay);
+        oscillator.detune.setValueAtTime(index % 2 === 0 ? -4 : 5, time);
+
+        partialGain.gain.setValueAtTime(0.0001, time);
+        partialGain.gain.exponentialRampToValueAtTime(partial.gain / 10, time + 0.015);
+        partialGain.gain.exponentialRampToValueAtTime(0.0001, time + partial.decay);
+
+        oscillator.connect(partialGain);
+        partialGain.connect(master);
+
+        oscillator.start(time + index * 0.008);
+        oscillator.stop(time + partial.decay + 0.1);
+      });
+
+      const noiseBuffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * 0.14)), context.sampleRate);
+      const noiseData = noiseBuffer.getChannelData(0);
+      for (let index = 0; index < noiseData.length; index += 1) {
+        noiseData[index] = (Math.random() * 2 - 1) * Math.exp(-index / (noiseData.length / 5));
+      }
+
+      const noise = context.createBufferSource();
+      const noiseFilter = context.createBiquadFilter();
+      const noiseGain = context.createGain();
+
+      noise.buffer = noiseBuffer;
+      noiseFilter.type = 'bandpass';
+      noiseFilter.frequency.setValueAtTime(2100, time);
+      noiseFilter.Q.setValueAtTime(0.9, time);
+      noiseGain.gain.setValueAtTime(0.08, time);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.18);
+
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(master);
+      noise.start(time);
+      noise.stop(time + 0.18);
     };
 
     const startAudio = async () => {
@@ -226,7 +354,7 @@ export function DussehraBlessingOverlay() {
 
       playChime();
       if (chimeIntervalRef.current == null) {
-        chimeIntervalRef.current = window.setInterval(playChime, 2400);
+        chimeIntervalRef.current = window.setInterval(playChime, 3600);
       }
     };
 
@@ -355,13 +483,19 @@ export function DussehraBlessingOverlay() {
                       ? { opacity: 0, x: '4vw', scale: 0.98, rotateY: 4 }
                       : { opacity: 1, x: 0, scale: 1, rotateY: 0 }}
                     transition={{ duration: phase === 'entry' ? 2.4 : 1, ease: [0.22, 1, 0.36, 1] }}
-                    className="relative w-full max-w-[330px] transform-gpu [transform-style:preserve-3d] sm:max-w-[380px] lg:max-w-[420px]"
+                    className="relative w-full max-w-[330px] transform-gpu [transform-style:preserve-3d] sm:max-w-[390px] lg:max-w-[440px]"
                   >
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.85 }}
-                      animate={{ opacity: phase === 'exit' ? 0 : 1, scale: 1 }}
+                      initial={{ opacity: 0, scale: 0.82 }}
+                      animate={{ opacity: phase === 'exit' ? 0 : 1, scale: 1.02 }}
                       transition={{ duration: 1.6, ease: 'easeOut' }}
-                      className="absolute inset-0 rounded-full bg-[radial-gradient(circle,_rgba(255,245,190,0.34),_rgba(255,196,77,0.12)_46%,_transparent_70%)] blur-2xl"
+                      className="absolute inset-0 rounded-full bg-[radial-gradient(circle,_rgba(255,248,196,0.52),_rgba(255,196,77,0.18)_44%,_transparent_72%)] blur-3xl"
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8, rotate: -8 }}
+                      animate={{ opacity: phase === 'exit' ? 0 : 0.9, scale: 1, rotate: 6 }}
+                      transition={{ duration: 2.2, ease: 'easeOut' }}
+                      className="absolute inset-[8%] rounded-full border border-[#ffe2a8]/20 bg-[radial-gradient(circle,_rgba(255,223,128,0.14),_rgba(255,223,128,0.03)_58%,_transparent_78%)] shadow-[0_0_90px_rgba(251,191,36,0.14)]"
                     />
                     <DurgaFigure phase={phase} />
                     <AnimatePresence>
