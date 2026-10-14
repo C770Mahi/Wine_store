@@ -27,10 +27,10 @@ export function ShopSortControl({ value }: { value: string }) {
   };
 
   return (
-    <label className="flex w-full flex-col gap-2 text-sm font-semibold text-slate-600 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+    <label className="flex w-full flex-col gap-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:w-auto sm:flex-row sm:items-center sm:gap-2 sm:text-sm sm:tracking-normal">
       <span>Sort</span>
       <select
-        className="min-h-[44px] w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 sm:w-auto"
+        className="min-h-[40px] w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 sm:w-auto"
         value={value}
         onChange={(event) => handleChange(event.target.value)}
       >

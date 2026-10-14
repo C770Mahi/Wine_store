@@ -4,11 +4,42 @@ import { Product, formatCurrency } from '@/lib/catalog';
 
 interface ProductCardProps {
   product: Product;
+  compact?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, compact = false }: ProductCardProps) {
   const lowestVariant = product.variants[0];
   const stockLabel = lowestVariant?.inStock ? 'In stock' : 'Out of stock';
+
+  if (compact) {
+    return (
+      <article className="card flex h-full min-w-0 flex-col overflow-hidden rounded-2xl">
+        <Link href={`/product/${product.slug}`} className="block">
+          <div className="relative h-24 w-full bg-slate-100 sm:h-28 lg:h-32">
+            <img src={product.image} alt={product.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+            {product.isNew ? <span className="absolute left-2 top-2 rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] text-white">New</span> : null}
+          </div>
+        </Link>
+        <div className="flex min-w-0 flex-1 flex-col gap-2 p-2.5 sm:p-3">
+          <div className="flex min-w-0 items-center justify-between gap-2 text-[10px] font-semibold text-muted sm:text-[11px]">
+            <span className="truncate">{product.brand}</span>
+            <span className="shrink-0 text-amber-600">★ {product.rating.toFixed(1)}</span>
+          </div>
+          <div className="min-w-0">
+            <h3 className="line-clamp-2 break-words text-xs font-bold text-ink sm:text-sm">{product.name}</h3>
+            <p className="mt-1 truncate text-[10px] text-muted sm:text-xs">{lowestVariant?.label ?? product.variants[0]?.label ?? product.eta}</p>
+          </div>
+          <div className="mt-auto flex flex-col gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] text-muted">Starts at</p>
+              <p className="text-sm font-extrabold text-ink sm:text-base">{lowestVariant ? formatCurrency(lowestVariant.salePrice) : '—'}</p>
+            </div>
+            {lowestVariant ? <AddToCartButton variantId={lowestVariant.id} className="btn-primary min-h-[38px] w-full rounded-xl px-2.5 py-2 text-[11px] sm:min-h-[40px] sm:text-xs" /> : null}
+          </div>
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article className="card flex h-full min-w-0 flex-col overflow-hidden">

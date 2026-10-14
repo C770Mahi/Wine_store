@@ -129,7 +129,7 @@ export function AppHeader() {
     ? null
     : (
         <>
-          <Link href="/auth/login" className="inline-flex min-h-[44px] items-center justify-center rounded-2xl px-4 py-2 font-semibold text-brand transition hover:bg-brand-soft/60">Login</Link>
+          <Link href="/auth/login" className="inline-flex min-h-[44px] items-center justify-center rounded-2xl px-4 py-2 font-semibold text-brand transition hover:bg-brand-soft/60">Account</Link>
           <Link href="/auth/signup" className="chip w-full sm:w-auto">Sign up</Link>
         </>
       );

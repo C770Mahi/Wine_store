@@ -110,13 +110,13 @@ export default function AccountPage() {
 
   if (!hasSession) {
     return (
-      <main className="page-shell pb-16 pt-8">
-        <article className="card mx-auto max-w-2xl p-8 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Customer profile</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-ink">Sign in to open your account</h1>
+      <main className="page-shell pb-16 pt-6">
+        <article className="card mx-auto max-w-xl p-5 text-center sm:p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand sm:text-sm">Account</p>
+          <h1 className="mt-3 text-2xl font-black tracking-tight text-ink sm:text-3xl">Sign in to open your account</h1>
           <p className="mt-3 text-sm text-muted">Your name, mobile number, saved addresses, and order history are available after login.</p>
-          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link href="/auth/login" className="btn-primary w-full sm:w-auto">Login</Link>
+          <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
+            <Link href="/auth/login" className="btn-primary w-full sm:w-auto">Account</Link>
             <Link href="/auth/signup" className="btn-secondary w-full sm:w-auto">Create account</Link>
           </div>
         </article>

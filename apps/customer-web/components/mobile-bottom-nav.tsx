@@ -58,7 +58,7 @@ export function MobileBottomNav() {
         </Link>
         <Link href={(hasSession ? '/account' : '/auth/login') as Route} className={`flex min-h-[56px] flex-col items-center justify-center rounded-2xl border text-[11px] font-semibold transition ${navClass(pathname.startsWith('/account') || pathname.startsWith('/auth'))}`}>
           <span className="text-base">◎</span>
-          <span>{hasSession ? 'Account' : 'Login'}</span>
+          <span>Account</span>
         </Link>
       </nav>
     </div>

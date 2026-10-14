@@ -86,10 +86,11 @@ export async function getCart(userId = DEMO_USER_ID) {
     quantity: number;
     unit_price: number;
     product_name: string;
+    product_image: string | null;
     volume_ml: number;
     pack_type: string;
   }>(
-    `SELECT ci.id, ci.variant_id, ci.quantity, ci.unit_price, p.name AS product_name, pv.volume_ml, pv.pack_type
+    `SELECT ci.id, ci.variant_id, ci.quantity, ci.unit_price, p.name AS product_name, p.image AS product_image, pv.volume_ml, pv.pack_type
      FROM cart_items ci
      INNER JOIN product_variants pv ON pv.id = ci.variant_id
      INNER JOIN products p ON p.id = pv.product_id
@@ -109,6 +110,7 @@ export async function getCart(userId = DEMO_USER_ID) {
       id: item.id,
       variantId: item.variant_id,
       productName: `${item.product_name} · ${formatVariantLabel(Number(item.volume_ml), String(item.pack_type ?? 'ml'))}`,
+      image: item.product_image ?? undefined,
       quantity: Number(item.quantity),
       unitPrice: Number(item.unit_price)
     })),
